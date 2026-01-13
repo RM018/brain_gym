@@ -1,0 +1,526 @@
+.brainViewer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.brainContainer {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(to bottom right, #1a1a1a, #2d2d2d);
+}
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  z-index: 10;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(6, 255, 165, 0.3);
+  border-top-color: #06ffa5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+}
+
+.controlButton {
+  padding: 8px 16px;
+  background-color: rgba(6, 255, 165, 0.15);
+  color: #fff;
+  border: 1px solid #06ffa5;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.controlButton:hover {
+  background-color: rgba(6, 255, 165, 0.3);
+}
+
+.controlButton[data-active="true"] {
+  background-color: #06ffa5;
+  color: #000;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Tooltip styles */
+.tooltip {
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  pointer-events: none;
+  border: 1px solid rgba(6, 255, 165, 0.3);
+  backdrop-filter: blur(4px);
+  transform: translate(-50%, -100%);
+}
+
+.tooltipTitle {
+  color: #06ffa5;
+  font-weight: 600;
+}
+
+.tooltipRegion {
+  color: #06ffa5;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.tooltipActive {
+  color: #00d4ff;
+  font-size: 0.8em;
+}
+
+@media (max-width: 768px) {
+  .brainContainer {
+    height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brainContainer {
+    height: 300px;
+  }
+}
+
+.brain-info-panel-simple {
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(6, 255, 165, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 200px;
+  max-width: 300px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.info-header-simple {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.region-indicator-simple {
+  width: 8px;
+  height: 8px;
+  background: #06ffa5;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(6, 255, 165, 0.5);
+}
+
+.region-name-simple {
+  color: #06ffa5;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.info-content-simple {
+  color: #ffffff;
+}
+
+.region-function-simple {
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.viewport-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.canvas-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hud-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hud-element {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(6, 255, 165, 0.3);
+  color: #06ffa5;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+  backdrop-filter: blur(4px);
+}
+
+/* Lab Selection Styles */
+.lab-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.lab-button {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(6, 255, 165, 0.3);
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.lab-button:hover {
+  background: rgba(6, 255, 165, 0.2);
+  border-color: #06ffa5;
+}
+
+.lab-button.active {
+  background: #06ffa5;
+  color: #000000;
+  font-weight: 600;
+}
+
+/* Loading State */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  color: #06ffa5;
+  font-size: 18px;
+  backdrop-filter: blur(4px);
+}
+
+/* Neural Stats */
+.neural-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.stat-box {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(6, 255, 165, 0.3);
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-value {
+  color: #06ffa5;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  color: #ffffff;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.viewport {
+  width: 100%;
+  height: 100%;
+  min-height: 600px;
+  background: rgba(0, 212, 255, 0.05);
+  border-radius: 15px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hudOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hudElement {
+  background: rgba(6, 255, 165, 0.1);
+  border: 1px solid rgba(6, 255, 165, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #06ffa5;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.brainInfoPanel {
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(6, 255, 165, 0.3);
+  padding: 12px;
+  border-radius: 8px;
+  min-width: 200px;
+  backdrop-filter: blur(10px);
+}
+
+.infoHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.regionIndicator {
+  width: 8px;
+  height: 8px;
+  background: #06ffa5;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(6, 255, 165, 0.5);
+  animation: pulse 2s infinite;
+}
+
+.regionName {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.regionFunction {
+  color: #cbd5e1;
+  font-size: 12px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+.brainCanvasWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 600px;
+  background: radial-gradient(circle at 50% 35%, rgba(6,255,165,0.04), transparent 60%),
+              linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+  border: 1px solid rgba(6,255,165,0.12);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.regionPanelsWrap {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 320px;
+  z-index: 20;
+  pointer-events: none;
+  max-height: calc(100% - 24px);
+  overflow-y: auto;
+}
+
+.regionPanelsWrap .regionInfoFloating {
+  position: relative;
+  top: auto;
+  right: auto;
+  width: 100%;
+}
+
+@media (max-width: 860px) {
+  .regionPanelsWrap {
+    position: static;
+    max-width: none;
+    padding: 0;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+.regionInfoFloating {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  width: auto;
+  max-width: clamp(260px, 30vw, 360px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  background: rgba(10,12,14,0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0,212,255,0.25);
+  border-radius: 14px;
+  padding: 1rem 1rem 1.1rem;
+  box-shadow: 0 8px 28px -6px rgba(0,0,0,0.55), 0 0 0 1px rgba(6,255,165,0.15) inset;
+  animation: panelFade 0.35s cubic-bezier(.4,.75,.3,1);
+  pointer-events: none; /* passive until we decide to make it interactive */
+}
+.regionInfoFloating::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(6,255,165,0.08));
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.regionInfoHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding-bottom: .45rem;
+}
+.regionInfoTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  background: linear-gradient(90deg,#06ffa5,#00d4ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.regionBadge {
+  font-size: .6rem;
+  text-transform: uppercase;
+  letter-spacing: .15em;
+  background: rgba(6,255,165,0.12);
+  padding: .3rem .55rem;
+  border-radius: 6px;
+  border: 1px solid rgba(6,255,165,0.4);
+  color: #06ffa5;
+  font-weight: 600;
+}
+.regionShort {
+  font-size: .72rem;
+  line-height: 1.4;
+  color: #d4e4ec;
+  margin: 0; 
+  font-weight: 500;
+}
+.regionDetails {
+  font-size: .68rem;
+  line-height: 1.5;
+  color: #9aa9b4;
+  margin: 0;
+  opacity: .95;
+}
+.activeNotice {
+  margin-top: .35rem;
+  font-size: .6rem;
+  letter-spacing: .08em;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  background: linear-gradient(90deg, rgba(0,212,255,0.15), rgba(6,255,165,0.15));
+  border: 1px solid rgba(0,212,255,0.35);
+  color: #00e3ff;
+  padding: .4rem .6rem;
+  border-radius: 6px;
+  font-weight: 600;
+  box-shadow: 0 0 0 1px rgba(0,212,255,0.25) inset, 0 4px 12px -4px rgba(0,0,0,0.5);
+}
+
+@keyframes panelFade {
+  from { opacity: 0; transform: translateY(-8px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 860px) {
+  .regionInfoFloating {
+    position: static;
+    width: 100%;
+    max-width: none;
+    margin: .9rem auto 0;
+    box-shadow: 0 4px 16px -6px rgba(0,0,0,0.55);
+    pointer-events: auto;
+  }
+  .brainCanvasWrapper { min-height: 480px; }
+}
+
+@media (max-width: 520px) {
+  .regionInfoTitle { font-size: .85rem; }
+  .regionShort { font-size: .68rem; }
+  .regionDetails { font-size: .64rem; }
+}
+
+@media (min-width:1400px){
+  .regionInfoFloating {
+    max-width: 400px;
+  }
+}
