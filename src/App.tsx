@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Brain } from 'lucide-react';
@@ -15,7 +15,6 @@ import Header from './components/Header';
 
 /* ================= DASHBOARD CONTENT ================= */
 function DashboardContent() {
-
   const mentalLoadData = [
     { time: '6AM', load: 35 },
     { time: '8AM', load: 45 },
@@ -153,14 +152,12 @@ function DashboardContent() {
 
 /* ================= LAYOUT ================= */
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
-  const [focusMode, setFocusMode] = useState(true);
-
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 text-gray-100 overflow-hidden">
       <Sidebar />
 
       <div className="flex-1 flex flex-col overflow-hidden relative">
-        <Header focusMode={focusMode} setFocusMode={setFocusMode} />
+        <Header />
 
         {/* Background particles */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
