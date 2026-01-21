@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Brain, Zap, TrendingUp, Sparkles, Shuffle, Lightbulb, Settings as SettingsIcon, Flame } from 'lucide-react';
 import {
@@ -507,12 +507,14 @@ function DashboardContent() {
 
 /* ================= LAYOUT ================= */
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 text-gray-100 overflow-hidden">
       <Sidebar />
 
       <div className="flex-1 flex flex-col overflow-hidden relative">
-        <Header />
+        {location.pathname !== '/training-floor' && <Header />}
 
         {/* Background particles */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">

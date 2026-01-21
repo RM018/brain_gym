@@ -104,14 +104,17 @@ const TrainingFloor = () => {
               <SuggestionCard
                 title="Daily Logic Puzzle"
                 desc="Devious Musing: Units 3 Modules 1"
+                bgImage="/images/daily_logic.png"
               />
               <SuggestionCard
                 title="Quick Mind Mixing"
                 desc="Decision Making, Task Maturing"
+                bgImage="/images/mind_mixing.png"
               />
               <SuggestionCard
                 title="Pattern Matching"
                 desc="Decision Making Scenario Practice"
+                bgImage="/images/pattern_match.png"
               />
 
               <div className="bg-[#0a2024]/40 border border-emerald-900/30 rounded-xl p-4 backdrop-blur-md flex flex-col justify-center shadow-lg">
@@ -197,10 +200,24 @@ const CircularAbility = ({
   </div>
 );
 
-const SuggestionCard = ({ title, desc }: { title: string; desc: string }) => (
-  <div className="bg-[#0a2024]/40 border border-emerald-900/30 rounded-xl overflow-hidden hover:bg-[#0c2a2f] transition-all duration-300 p-5 shadow-lg">
-    <h3 className="text-xs font-bold text-emerald-100 mb-2">{title}</h3>
-    <p className="text-[11px] text-gray-400 leading-relaxed">{desc}</p>
+const SuggestionCard = ({
+  title,
+  desc,
+  bgImage,
+}: {
+  title: string;
+  desc: string;
+  bgImage?: string;
+}) => (
+  <div
+    className="relative rounded-xl overflow-hidden shadow-lg border border-emerald-900/30 transition-all duration-300 hover:scale-1.01"
+    style={bgImage ? { backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+  >
+    <div className="absolute inset-0 bg-[#021013]/40" />
+    <div className="relative p-5">
+      <h3 className="text-xs font-bold text-emerald-100 mb-2">{title}</h3>
+      <p className="text-[11px] text-gray-300 leading-relaxed">{desc}</p>
+    </div>
   </div>
 );
 
