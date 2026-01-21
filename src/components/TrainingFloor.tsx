@@ -19,25 +19,25 @@ const TrainingFloor = () => {
       <main className="flex-1 flex flex-col relative overflow-y-auto">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-900/10 via-transparent to-transparent pointer-events-none" />
 
-        <div className="p-8 flex-1 flex flex-col">
+        <div className="p-4 md:p-6 lg:p-8 flex-1 flex flex-col">
           {/* ================= TOP STATS ================= */}
-          <div className="flex justify-between items-start relative z-10 mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-start relative z-10 mb-6 md:mb-8 gap-4 md:gap-0">
             <div className="space-y-1">
               <p className="text-[10px] tracking-[0.2em] text-emerald-400/80 font-bold uppercase">
                 Current Mental Load
               </p>
-              <div className="relative w-40 h-14 flex items-center justify-center border-b border-emerald-500/30">
-                <div className="text-3xl font-light text-white drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]">
+              <div className="relative w-32 md:w-40 h-12 md:h-14 flex items-center justify-center border-b border-emerald-500/30">
+                <div className="text-2xl md:text-3xl font-light text-white drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]">
                   75%
                 </div>
               </div>
             </div>
 
-            <div className="text-right">
+            <div className="md:text-right w-full md:w-auto">
               <p className="text-[10px] tracking-[0.2em] text-emerald-400/80 font-bold mb-2 uppercase">
                 Steex & Shantha
               </p>
-              <div className="space-y-1.5 w-40 ml-auto">
+              <div className="space-y-1.5 w-full md:w-40 md:ml-auto">
                 <ProgressBar width="w-[75%]" color="bg-emerald-400" />
                 <ProgressBar width="w-[65%]" color="bg-teal-500" />
                 <ProgressBar width="w-[82%]" color="bg-cyan-400" />
@@ -46,7 +46,7 @@ const TrainingFloor = () => {
           </div>
 
           {/* ================= BRAIN AREA ================= */}
-          <div className="relative h-[550px] flex items-center justify-center">
+          <div className="relative h-[350px] md:h-[450px] lg:h-[550px] flex items-center justify-center">
             <div className="relative z-20 w-220 h-80 flex items-center justify-center mt-[-60px]">
               <div className="absolute inset-0 bg-emerald-500/5 blur-[100px] rounded-full animate-pulse" />
               <BrainShowpiece />
@@ -58,16 +58,19 @@ const TrainingFloor = () => {
                 label="Stress Training"
                 icon={<IoPulseSharp />}
                 pos="top-[-5%] left-[15%]"
+                className="hidden md:block"
               />
               <CircularAbility
                 label="Complex Processing"
                 icon={<GiProcessor />}
                 pos="top-[30%] left-[20%]"
+                className="hidden lg:block"
               />
               <CircularAbility
                 label="Voice & Value"
                 icon={<FaMicrophone />}
                 pos="top-[55%] left-[30%]"
+                className="hidden md:block"
               />
 
               <CircularAbility
@@ -81,23 +84,26 @@ const TrainingFloor = () => {
                 label="Creativity"
                 icon={<FaLightbulb />}
                 pos="top-[55%] right-[30%]"
+                className="hidden md:block"
               />
               <CircularAbility
                 label="Emotional Intelligence"
                 icon={<FaHeartbeat />}
                 pos="top-[30%] right-[20%]"
+                className="hidden lg:block"
               />
               <CircularAbility
                 label="Memory"
                 icon={<MdMemory />}
                 pos="top-[-5%] right-[15%]"
+                className="hidden md:block"
               />
             </div>
           </div>
 
           {/* ================= SUGGESTED ================= */}
-          <div className="relative z-10 mt-12 mb-20">
-            <h2 className="text-lg font-light tracking-wide mb-6 text-emerald-100/50">
+          <div className="relative z-10 mt-8 md:mt-12 mb-12 md:mb-20">
+            <h2 className="text-base md:text-lg font-light tracking-wide mb-4 md:mb-6 text-emerald-100/50">
               Suggested for Today:
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -150,13 +156,15 @@ const CircularAbility = ({
   pos,
   large,
   icon,
+  className,
 }: {
   label: string;
   pos: string;
   large?: boolean;
   icon: React.ReactNode;
+  className?: string;
 }) => (
-  <div className={`absolute ${pos} pointer-events-auto group cursor-pointer`}>
+  <div className={`absolute ${pos} pointer-events-auto group cursor-pointer ${className || ''}`}>
     <div
       className={`relative ${
         large ? "w-42 h-42" : "w-42 h-42"

@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Home, TrendingUp, Dumbbell, Settings, Zap, Brain } from 'lucide-react';
+import { Home, TrendingUp, Dumbbell, Settings, Zap, Brain, Menu, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [activeTab, setActiveTab] = useState('dashboard');
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         const path = location.pathname;
@@ -38,10 +39,35 @@ const Sidebar = () => {
         if (location.pathname !== path) {
             navigate(path);
         }
+        setIsMobileMenuOpen(false);
     };
 
     return (
-        <div className="w-64 glass-card border-r border-teal-500/30 flex flex-col shadow-2xl relative overflow-hidden">
+        <>
+        {/* Hamburger Menu Button - Mobile Only */}
+        <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="fixed top-4 left-4 z-50 lg:hidden p-2 glass-card rounded-lg border border-teal-500/30 hover:border-teal-400/60 transition-all"
+        >
+            {isMobileMenuOpen ? (
+                <X size={24} className="text-teal-300" />
+            ) : (
+                <Menu size={24} className="text-teal-300" />
+            )}
+        </button>
+
+        {/* Dark Overlay - Mobile Only */}
+        {isMobileMenuOpen && (
+            <div
+                className="fixed inset-0 bg-black/60 z-30 lg:hidden"
+                onClick={() => setIsMobileMenuOpen(false)}
+            />
+        )}
+
+        {/* Sidebar */}
+        <div className={`fixed lg:relative w-64 glass-card border-r border-teal-500/30 flex flex-col shadow-2xl overflow-hidden z-40 h-full transition-transform duration-300 ${
+            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0`}>
             {/* Animated neural background */}
             <div className="absolute inset-0 neural-bg opacity-30" />
             <motion.div
@@ -182,6 +208,7 @@ const Sidebar = () => {
                 <p className="text-[9px] text-gray-600 mt-0.5">Neural Excellence</p>
             </div>
         </div>
+        </>
     );
 };
 

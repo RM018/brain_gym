@@ -60,7 +60,7 @@ function DashboardContent() {
   };
 
   return (
-    <main className="flex-1 p-8 overflow-auto neural-bg">
+    <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto neural-bg">
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -69,14 +69,14 @@ function DashboardContent() {
       >
 
         {/* Welcome Banner */}
-        <motion.div variants={itemVariants} className="glass-card rounded-3xl p-8 relative overflow-hidden">
+        <motion.div variants={itemVariants} className="glass-card rounded-3xl p-4 md:p-6 lg:p-8 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 via-cyan-500/5 to-blue-500/10" />
-          <div className="relative z-10 flex items-center justify-between">
+          <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-bold brain-gradient-text mb-2" style={{ fontFamily: "'Orbitron', sans-serif" }}>
+              <h2 className="text-2xl md:text-3xl font-bold brain-gradient-text mb-2" style={{ fontFamily: "'Orbitron', sans-serif" }}>
                 Welcome to Your Neural Dashboard
               </h2>
-              <p className="text-gray-400 text-sm flex items-center gap-2">
+              <p className="text-gray-400 text-xs md:text-sm flex items-center gap-2">
                 <motion.span
                   animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 2, repeat: Infinity }}
@@ -89,7 +89,7 @@ function DashboardContent() {
               onClick={() => navigate('/training-floor')}
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
-              className="btn-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 text-white shadow-lg"
+              className="btn-primary px-4 md:px-6 py-2.5 md:py-3 rounded-xl font-bold flex items-center gap-2 text-white shadow-lg text-sm md:text-base w-full md:w-auto justify-center"
             >
               <Zap size={20} />
               Start Training
@@ -104,10 +104,10 @@ function DashboardContent() {
         </motion.div>
 
         {/* Top Stats */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <motion.div variants={itemVariants} className="glass-card rounded-2xl p-6 hover:border-teal-400/40 transition-all duration-300">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <motion.div variants={itemVariants} className="glass-card rounded-2xl p-4 md:p-6 hover:border-teal-400/40 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-teal-300 uppercase tracking-widest flex items-center gap-2">
+              <h3 className="text-xs md:text-sm font-bold text-teal-300 uppercase tracking-widest flex items-center gap-2">
                 <TrendingUp size={18} className="text-teal-400" />
                 Mental Load Curve
               </h3>
@@ -115,7 +115,7 @@ function DashboardContent() {
                 Real-time
               </span>
             </div>
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={160} className="md:h-[200px]">
               <LineChart data={mentalLoadData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(20,184,166,0.1)" />
                 <XAxis dataKey="time" stroke="#6b7280" style={{ fontSize: '11px' }} />
@@ -133,9 +133,9 @@ function DashboardContent() {
             </ResponsiveContainer>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="glass-card rounded-2xl p-6 hover:border-cyan-400/40 transition-all duration-300">
+          <motion.div variants={itemVariants} className="glass-card rounded-2xl p-4 md:p-6 hover:border-cyan-400/40 transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-cyan-300 uppercase tracking-widest flex items-center gap-2">
+              <h3 className="text-xs md:text-sm font-bold text-cyan-300 uppercase tracking-widest flex items-center gap-2">
                 <Brain size={18} className="text-cyan-400" />
                 Cognitive Metrics
               </h3>
@@ -173,7 +173,7 @@ function DashboardContent() {
         {/* Main Content Area */}
         <motion.div
   variants={itemVariants}
-  className="glass-card rounded-3xl p-8 hover:border-teal-400/50 transition-all duration-300 relative overflow-hidden group"
+  className="glass-card rounded-3xl p-4 md:p-6 lg:p-8 hover:border-teal-400/50 transition-all duration-300 relative overflow-hidden group"
 >
   {/* Animated background orbs */}
   <motion.div
@@ -187,11 +187,11 @@ function DashboardContent() {
     className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"
   />
 
-  <div className="flex flex-col lg:flex-row gap-8 relative z-10">
+  <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 relative z-10">
     {/* Left Side - Neural Network Visualization */}
     <div className="lg:w-1/2">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-bold text-teal-300 uppercase tracking-widest flex items-center gap-2">
+      <div className="flex items-center justify-between mb-4 md:mb-6">
+        <h3 className="text-base md:text-lg font-bold text-teal-300 uppercase tracking-widest flex items-center gap-2">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -211,7 +211,7 @@ function DashboardContent() {
       </div>
       
       {/* Neural Network Visualization */}
-      <div className="relative h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-teal-500/30 p-6 shadow-2xl">
+      <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-teal-500/30 p-4 md:p-6 shadow-2xl">
         {/* Animated neural connections */}
         <svg className="absolute inset-0 w-full h-full">
           {/* Neural connections */}
@@ -286,17 +286,17 @@ function DashboardContent() {
 
     {/* Right Side - Stats & Metrics */}
     <div className="lg:w-1/2">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
         {/* Active Session */}
         <motion.div 
           whileHover={{ scale: 1.02, y: -2 }}
-          className="glass-card rounded-2xl p-5 border border-teal-500/30 cursor-pointer hover:border-teal-400/60 transition-all"
+          className="glass-card rounded-2xl p-4 md:p-5 border border-teal-500/30 cursor-pointer hover:border-teal-400/60 transition-all"
         >
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-2 md:mb-3">
             <Zap size={16} className="text-yellow-400" />
-            <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Active Session</span>
+            <span className="text-[10px] md:text-xs text-gray-400 font-semibold uppercase tracking-wider">Active Session</span>
           </div>
-          <p className="text-3xl font-bold text-white mb-1">42m 18s</p>
+          <p className="text-2xl md:text-3xl font-bold text-white mb-1">42m 18s</p>
           <div className="flex items-center gap-2">
             <div className="flex-1 h-1 bg-slate-700/50 rounded-full overflow-hidden">
               <motion.div
@@ -316,14 +316,14 @@ function DashboardContent() {
         {/* Cognitive Load */}
         <motion.div 
           whileHover={{ scale: 1.02, y: -2 }}
-          className="glass-card rounded-2xl p-5 border border-cyan-500/30 cursor-pointer hover:border-cyan-400/60 transition-all"
+          className="glass-card rounded-2xl p-4 md:p-5 border border-cyan-500/30 cursor-pointer hover:border-cyan-400/60 transition-all"
         >
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-2 md:mb-3">
             <Brain size={16} className="text-cyan-400" />
-            <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Cognitive Load</span>
+            <span className="text-[10px] md:text-xs text-gray-400 font-semibold uppercase tracking-wider">Cognitive Load</span>
           </div>
           <div className="flex items-baseline gap-2 mb-2">
-            <p className="text-3xl font-bold text-white">{mentalLoad}%</p>
+            <p className="text-2xl md:text-3xl font-bold text-white">{mentalLoad}%</p>
             <motion.span 
               className="text-xs px-2 py-1 rounded-full font-bold"
               animate={{ 
@@ -356,13 +356,13 @@ function DashboardContent() {
         {/* Daily Progress */}
         <motion.div 
           whileHover={{ scale: 1.02, y: -2 }}
-          className="glass-card rounded-2xl p-5 border border-green-500/30 cursor-pointer hover:border-green-400/60 transition-all"
+          className="glass-card rounded-2xl p-4 md:p-5 border border-green-500/30 cursor-pointer hover:border-green-400/60 transition-all"
         >
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-2 md:mb-3">
             <TrendingUp size={16} className="text-green-400" />
-            <span className="text-xs text-gray-400 uppercase tracking-widest">Daily Progress</span>
+            <span className="text-[10px] md:text-xs text-gray-400 uppercase tracking-widest">Daily Progress</span>
           </div>
-          <p className="text-2xl font-bold text-white">78%</p>
+          <p className="text-xl md:text-2xl font-bold text-white">78%</p>
           <div className="w-full h-1.5 bg-slate-700/50 rounded-full mt-2 overflow-hidden">
             <motion.div 
               className="h-full bg-gradient-to-r from-green-400 to-teal-500 rounded-full"
@@ -376,21 +376,21 @@ function DashboardContent() {
         {/* Neural Efficiency */}
         <motion.div 
           whileHover={{ scale: 1.02, y: -2 }}
-          className="glass-card rounded-2xl p-5 border border-purple-500/30 cursor-pointer hover:border-purple-400/60 transition-all"
+          className="glass-card rounded-2xl p-4 md:p-5 border border-purple-500/30 cursor-pointer hover:border-purple-400/60 transition-all"
         >
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-2 md:mb-3">
             <Sparkles size={16} className="text-purple-400" />
-            <span className="text-xs text-gray-400 uppercase tracking-widest">Neural Efficiency</span>
+            <span className="text-[10px] md:text-xs text-gray-400 uppercase tracking-widest">Neural Efficiency</span>
           </div>
-          <p className="text-2xl font-bold brain-gradient-text">92%</p>
+          <p className="text-xl md:text-2xl font-bold brain-gradient-text">92%</p>
           <p className="text-xs text-gray-400 mt-1">Optimal brain performance</p>
         </motion.div>
       </div>
 
       {/* Quick Actions */}
-      <div className="glass-card rounded-2xl p-5 border border-teal-500/30">
-        <h4 className="text-sm font-semibold text-gray-300 mb-4 uppercase tracking-widest">Quick Actions</h4>
-        <div className="grid grid-cols-2 gap-3">
+      <div className="glass-card rounded-2xl p-4 md:p-5 border border-teal-500/30 mt-4 md:mt-6">
+        <h4 className="text-xs md:text-sm font-semibold text-gray-300 mb-3 md:mb-4 uppercase tracking-widest">Quick Actions</h4>
+        <div className="grid grid-cols-2 gap-2 md:gap-3">
           <motion.button
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
@@ -398,35 +398,35 @@ function DashboardContent() {
               boxShadow: ['0 0 0 rgba(20, 184, 166, 0)', '0 0 20px rgba(20, 184, 166, 0.3)', '0 0 0 rgba(20, 184, 166, 0)']
             }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="p-3 rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 border border-teal-400/30 hover:border-teal-400/60 transition-all flex items-center justify-center gap-2"
+            className="p-3 rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 border border-teal-400/30 hover:border-teal-400/60 transition-all flex items-center justify-center gap-2 flex-col md:flex-row"
           >
             <Brain size={16} className="text-teal-400" />
-            <span className="text-xs font-medium">Brain Boost</span>
+            <span className="text-[10px] md:text-xs font-medium">Brain Boost</span>
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
-            className="p-3 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 hover:border-cyan-400/60 transition-all flex items-center justify-center gap-2"
+            className="p-3 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 hover:border-cyan-400/60 transition-all flex items-center justify-center gap-2 flex-col md:flex-row"
           >
             <Shuffle size={16} className="text-cyan-400" />
-            <span className="text-xs font-medium">Quick Mix</span>
+            <span className="text-[10px] md:text-xs font-medium">Quick Mix</span>
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
-            className="p-3 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/30 hover:border-purple-400/60 transition-all flex items-center justify-center gap-2"
+            className="p-3 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/30 hover:border-purple-400/60 transition-all flex items-center justify-center gap-2 flex-col md:flex-row"
           >
             <Lightbulb size={16} className="text-purple-400" />
-            <span className="text-xs font-medium">Insights</span>
+            <span className="text-[10px] md:text-xs font-medium">Insights</span>
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate('/settings')}
-            className="p-3 rounded-lg bg-gradient-to-br from-slate-700/50 to-slate-600/50 border border-slate-600/30 hover:border-slate-500/60 transition-all flex items-center justify-center gap-2"
+            className="p-3 rounded-lg bg-gradient-to-br from-slate-700/50 to-slate-600/50 border border-slate-600/30 hover:border-slate-500/60 transition-all flex items-center justify-center gap-2 flex-col md:flex-row"
           >
             <SettingsIcon size={16} className="text-slate-400" />
-            <span className="text-xs font-medium">Settings</span>
+            <span className="text-[10px] md:text-xs font-medium">Settings</span>
           </motion.button>
         </div>
       </div>
@@ -434,8 +434,8 @@ function DashboardContent() {
   </div>
 
   {/* Performance Timeline */}
-  <div className="mt-6 pt-6 border-t border-teal-500/20">
-    <h4 className="text-sm font-semibold text-gray-300 mb-4">Recent Performance Timeline</h4>
+  <div className="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-teal-500/20">
+    <h4 className="text-xs md:text-sm font-semibold text-gray-300 mb-3 md:mb-4">Recent Performance Timeline</h4>
     <div className="flex items-center justify-between">
       {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => {
         const height = [65, 85, 72, 90, 78, 82, 68][i];
@@ -469,22 +469,23 @@ function DashboardContent() {
         <motion.div
           variants={itemVariants}
           whileHover={{ y: -2 }}
-          className="bg-gradient-to-r from-slate-800/40 to-teal-800/20 backdrop-blur-md border border-teal-500/30 rounded-2xl p-8 shadow-xl shadow-teal-500/10 hover:shadow-teal-500/20 transition-all duration-300 flex items-center justify-between group"
+          className="bg-gradient-to-r from-slate-800/40 to-teal-800/20 backdrop-blur-md border border-teal-500/30 rounded-2xl p-4 md:p-6 lg:p-8 shadow-xl shadow-teal-500/10 hover:shadow-teal-500/20 transition-all duration-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6 group"
         >
-          <div className="flex items-start gap-6">
+          <div className="flex items-start gap-4 md:gap-6 flex-1">
             <motion.div
               animate={pulseVariants}
               transition={{ duration: 2.5, repeat: Infinity }}
-              className="w-20 h-20 rounded-full bg-gradient-to-br from-teal-400 to-cyan-600 flex items-center justify-center shadow-lg shadow-teal-500/50 flex-shrink-0"
+              className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-teal-400 to-cyan-600 flex items-center justify-center shadow-lg shadow-teal-500/50 flex-shrink-0"
             >
-              <Brain size={40} className="text-slate-900" strokeWidth={1.5} />
+              <Brain size={32} className="md:hidden text-slate-900" strokeWidth={1.5} />
+              <Brain size={40} className="hidden md:block text-slate-900" strokeWidth={1.5} />
             </motion.div>
 
             <div className="flex-1 pt-1">
-              <h3 className="text-lg font-bold text-gray-100 mb-2 tracking-wide group-hover:text-teal-300 transition-colors duration-300">
+              <h3 className="text-base md:text-lg font-bold text-gray-100 mb-2 tracking-wide group-hover:text-teal-300 transition-colors duration-300">
                 NEURAL HEATMAP
               </h3>
-              <p className="text-sm text-gray-300 leading-relaxed font-light">
+              <p className="text-xs md:text-sm text-gray-300 leading-relaxed font-light">
                 An active claim can strengthen their left side and more active sides can help to reduce
                 stress and action play facilitates learning for children and adults alike.
               </p>
@@ -494,7 +495,7 @@ function DashboardContent() {
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-            className="text-4xl text-teal-500/30"
+            className="text-2xl md:text-4xl text-teal-500/30"
           >
             ✨
           </motion.div>
