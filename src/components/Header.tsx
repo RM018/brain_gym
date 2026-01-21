@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion';
-import { User } from 'lucide-react';
+import { User, TrendingUp } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
-
+    const navigate = useNavigate();
     const [focusMode, setFocusMode] = useState(true);
 
   return (
@@ -28,6 +29,17 @@ const Header = () => {
                 transition={{ duration: 0.5 }}
                 className="flex items-center gap-6"
               >
+                {/* Progress Button */}
+                <motion.button
+                  onClick={() => navigate('/progress')}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 border border-purple-400/30 rounded-lg transition-all duration-200"
+                >
+                  <TrendingUp size={20} className="text-purple-400" />
+                  <span className="text-sm font-medium text-purple-300">Progress</span>
+                </motion.button>
+
                 {/* User Icon */}
                 <button className="p-2 hover:bg-slate-800/40 rounded-lg transition-colors duration-200">
                   <User size={24} className="text-gray-400 hover:text-teal-300" />

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Home, Brain, TrendingUp, Dumbbell, Settings } from 'lucide-react';
+import { Home, TrendingUp, Dumbbell, Settings } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
@@ -48,9 +48,9 @@ const Sidebar = () => {
                 <motion.div
                     animate={pulseVariants}
                     transition={{ duration: 2, repeat: Infinity }}
-                    className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-400 to-cyan-600 flex items-center justify-center shadow-lg shadow-teal-500/50"
+                    className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-400 to-cyan-600 flex items-center justify-center shadow-lg shadow-teal-500/50 overflow-hidden"
                 >
-                    <Brain size={32} className="text-slate-900" strokeWidth={1.5} />
+                    <img src="/logo2.png" alt="Neural Forge Logo" className="w-14 h-14 object-contain p-1 bg-white/10 rounded" />
                 </motion.div>
             </div>
 
