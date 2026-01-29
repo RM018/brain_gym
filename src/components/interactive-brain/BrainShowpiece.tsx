@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, Float, Stars } from '@react-three/drei';
 import * as THREE from 'three';
@@ -36,7 +36,7 @@ const FresnelShader = {
   `
 };
 
-const BrainModel = () => {
+const BrainModel = ({ scale = 2.5 }: { scale?: number }) => {
   // Model path loading
   const { scene } = useGLTF('/models/brain_areas.glb'); 
   const brainRef = useRef<THREE.Group>(null!);
@@ -61,13 +61,39 @@ const BrainModel = () => {
     });
   }, [scene]);
 
-  return <primitive object={scene} ref={brainRef} scale={2.5} />;
+  return <primitive object={scene} ref={brainRef} scale={scale} />;
 };
 
 export default function BrainShowpiece() {
+  const [modelScale, setModelScale] = useState<number>(2.5);
+  const [cameraZ, setCameraZ] = useState<number>(6);
+
+  useEffect(() => {
+    function updateSizes() {
+      const w = typeof window !== 'undefined' ? window.innerWidth : 1024;
+      if (w <= 480) {
+        setModelScale(1.2);
+        setCameraZ(8);
+      } else if (w <= 768) {
+        setModelScale(1.8);
+        setCameraZ(7);
+      } else if (w <= 1024) {
+        setModelScale(2.2);
+        setCameraZ(6.5);
+      } else {
+        setModelScale(2.5);
+        setCameraZ(6);
+      }
+    }
+    updateSizes();
+    window.addEventListener('resize', updateSizes);
+    return () => window.removeEventListener('resize', updateSizes);
+  }, []);
+
   return (
-    <div style={{ width: '100vw', height: '100vh'}}>
-      <Canvas camera={{ position: [0, 0, 6], fov: 45 }}>
+    <div style={{ width: '100%', height: '100%' }}>
+      <Canvas style={{ width: '100%', height: '100%' }} dpr={[1, 2]} camera={{ position: [0, 0, cameraZ], fov: 45 }}>
+        <Suspense fallback={null}>
         
         
         {/* Background Stars like the image */}
@@ -79,15 +105,16 @@ export default function BrainShowpiece() {
           <BrainModel />
         </Float>
 
-        {/* Post-processing is key for the neon glow */}
-        <EffectComposer>
-          <Bloom 
-            luminanceThreshold={0} 
-            mipmapBlur 
-            intensity={0.1} 
-            radius={0.3} 
-          />
-        </EffectComposer>
+          {/* Post-processing is key for the neon glow */}
+          <EffectComposer>
+            <Bloom 
+              luminanceThreshold={0} 
+              mipmapBlur 
+              intensity={0.1} 
+              radius={0.3} 
+            />
+          </EffectComposer>
+        </Suspense>
       </Canvas>
     </div>
   );

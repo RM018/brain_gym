@@ -23,7 +23,7 @@ const Header = () => {
                   scale: [1, 1.2, 1],
                 }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -left-20 -top-20 w-40 h-40 bg-teal-500/20 rounded-full blur-3xl"
+                className="absolute -left-20 -top-20 w-40 h-40 bg-teal-500/20 rounded-full blur-3xl hidden sm:block"
               />
               <motion.div
                 animate={{
@@ -31,7 +31,7 @@ const Header = () => {
                   scale: [1, 1.3, 1],
                 }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute -right-20 -bottom-20 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl"
+                className="absolute -right-20 -bottom-20 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl hidden sm:block"
               />
 
               {/* Title with brain icon */}
@@ -39,7 +39,7 @@ const Header = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6 }}
-                className="flex items-center gap-3 lg:gap-4 relative z-10 ml-12 lg:ml-0"
+                className="flex items-center gap-3 lg:gap-4 relative z-10 ml-0 lg:ml-12 flex-1"
               >
                 <motion.div
                   animate={{ rotate: [0, 5, -5, 0] }}

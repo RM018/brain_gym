@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import BrainShowpiece from "./interactive-brain/BrainShowpiece";
 import { GiBrain, GiProcessor } from "react-icons/gi";
 import { MdMemory } from "react-icons/md";
@@ -8,6 +8,8 @@ import { FaHeartbeat, FaLightbulb, FaMicrophone } from "react-icons/fa";
 import { IoPulseSharp } from "react-icons/io5";
 
 const TrainingFloor = () => {
+  const [selectedAbility, setSelectedAbility] = useState<string | null>(null);
+
   return (
     <div className="flex min-h-screen bg-gradient-to-b from-slate-900/60 to-teal-900/30 backdrop-blur-xl text-white font-sans overflow-hidden">
       {/* BACKGROUND IMAGE */}
@@ -47,9 +49,11 @@ const TrainingFloor = () => {
 
           {/* ================= BRAIN AREA ================= */}
           <div className="relative h-[350px] md:h-[450px] lg:h-[550px] flex items-center justify-center">
-            <div className="relative z-20 w-220 h-80 flex items-center justify-center mt-[-60px]">
+            <div className="relative z-20 w-full max-w-[480px] h-[220px] md:h-[320px] lg:h-[420px] flex items-center justify-center mt-[-40px] md:mt-[-60px] mx-auto">
               <div className="absolute inset-0 bg-emerald-500/5 blur-[100px] rounded-full animate-pulse" />
-              <BrainShowpiece />
+              <div className="w-full h-full rounded-xl overflow-hidden">
+                <BrainShowpiece />
+              </div>
             </div>
 
             {/* ORBIT ICONS */}
@@ -59,18 +63,21 @@ const TrainingFloor = () => {
                 icon={<IoPulseSharp />}
                 pos="top-[-5%] left-[15%]"
                 className="hidden md:block"
+                onClick={() => setSelectedAbility("stress")}
               />
               <CircularAbility
                 label="Complex Processing"
                 icon={<GiProcessor />}
                 pos="top-[30%] left-[20%]"
                 className="hidden lg:block"
+                onClick={() => setSelectedAbility("processing")}
               />
               <CircularAbility
                 label="Voice & Value"
                 icon={<FaMicrophone />}
                 pos="top-[55%] left-[30%]"
                 className="hidden md:block"
+                onClick={() => setSelectedAbility("voice")}
               />
 
               <CircularAbility
@@ -78,6 +85,7 @@ const TrainingFloor = () => {
                 icon={<GiBrain />}
                 pos="top-[65%] left-[50%] -translate-x-1/2"
                 large
+                onClick={() => setSelectedAbility("pattern")}
               />
 
               <CircularAbility
@@ -85,18 +93,21 @@ const TrainingFloor = () => {
                 icon={<FaLightbulb />}
                 pos="top-[55%] right-[30%]"
                 className="hidden md:block"
+                onClick={() => setSelectedAbility("creativity")}
               />
               <CircularAbility
                 label="Emotional Intelligence"
                 icon={<FaHeartbeat />}
                 pos="top-[30%] right-[20%]"
                 className="hidden lg:block"
+                onClick={() => setSelectedAbility("emotional")}
               />
               <CircularAbility
                 label="Memory"
                 icon={<MdMemory />}
                 pos="top-[-5%] right-[15%]"
                 className="hidden md:block"
+                onClick={() => setSelectedAbility("memory")}
               />
             </div>
           </div>
@@ -136,6 +147,14 @@ const TrainingFloor = () => {
           </div>
         </div>
       </main>
+
+      {/* Ability Detail Modal */}
+      {selectedAbility && (
+        <AbilityModal
+          ability={selectedAbility}
+          onClose={() => setSelectedAbility(null)}
+        />
+      )}
     </div>
   );
 };
@@ -157,14 +176,19 @@ const CircularAbility = ({
   large,
   icon,
   className,
+  onClick,
 }: {
   label: string;
   pos: string;
   large?: boolean;
   icon: React.ReactNode;
   className?: string;
+  onClick?: () => void;
 }) => (
-  <div className={`absolute ${pos} pointer-events-auto group cursor-pointer ${className || ''}`}>
+  <div 
+    className={`absolute ${pos} pointer-events-auto group cursor-pointer ${className || ''}`}
+    onClick={onClick}
+  >
     <div
       className={`relative ${
         large ? "w-42 h-42" : "w-42 h-42"
@@ -228,5 +252,200 @@ const SuggestionCard = ({
     </div>
   </div>
 );
+
+/* ================= ABILITY MODAL ================= */
+const AbilityModal = ({ ability, onClose }: { ability: string; onClose: () => void }) => {
+  const abilityData: Record<string, { title: string; icon: React.ReactNode; description: string; benefits: string[]; exercises: string[] }> = {
+    stress: {
+      title: "Stress Training",
+      icon: <IoPulseSharp size={48} />,
+      description: "Build resilience and manage stress effectively through targeted cognitive exercises.",
+      benefits: [
+        "Enhanced stress tolerance",
+        "Improved emotional regulation",
+        "Better decision-making under pressure",
+        "Increased mental stamina"
+      ],
+      exercises: [
+        "Timed problem-solving challenges",
+        "Multi-tasking scenarios",
+        "Pressure adaptation drills"
+      ]
+    },
+    processing: {
+      title: "Complex Processing",
+      icon: <GiProcessor size={48} />,
+      description: "Enhance your brain's ability to handle complex information and multi-step problems.",
+      benefits: [
+        "Faster information processing",
+        "Improved analytical thinking",
+        "Enhanced problem-solving skills",
+        "Better multitasking abilities"
+      ],
+      exercises: [
+        "Algorithm puzzles",
+        "Sequential reasoning tasks",
+        "Data pattern recognition"
+      ]
+    },
+    voice: {
+      title: "Voice & Value",
+      icon: <FaMicrophone size={48} />,
+      description: "Develop communication skills and value judgment through interactive scenarios.",
+      benefits: [
+        "Clear communication skills",
+        "Enhanced value assessment",
+        "Improved persuasion abilities",
+        "Better social cognition"
+      ],
+      exercises: [
+        "Debate simulations",
+        "Value ranking exercises",
+        "Persuasion challenges"
+      ]
+    },
+    pattern: {
+      title: "Pattern Match",
+      icon: <GiBrain size={48} />,
+      description: "Train your brain to recognize patterns, predict outcomes, and make connections.",
+      benefits: [
+        "Enhanced pattern recognition",
+        "Improved predictive thinking",
+        "Better abstract reasoning",
+        "Increased cognitive flexibility"
+      ],
+      exercises: [
+        "Visual pattern puzzles",
+        "Sequence prediction",
+        "Analogy challenges"
+      ]
+    },
+    creativity: {
+      title: "Creativity",
+      icon: <FaLightbulb size={48} />,
+      description: "Unlock your creative potential through divergent thinking and innovation exercises.",
+      benefits: [
+        "Enhanced creative thinking",
+        "Improved idea generation",
+        "Better problem reframing",
+        "Increased mental flexibility"
+      ],
+      exercises: [
+        "Brainstorming sessions",
+        "Unusual uses tasks",
+        "Creative storytelling"
+      ]
+    },
+    emotional: {
+      title: "Emotional Intelligence",
+      icon: <FaHeartbeat size={48} />,
+      description: "Develop emotional awareness, empathy, and interpersonal effectiveness.",
+      benefits: [
+        "Better emotion recognition",
+        "Enhanced empathy",
+        "Improved relationship skills",
+        "Increased self-awareness"
+      ],
+      exercises: [
+        "Emotion identification tasks",
+        "Empathy scenarios",
+        "Social situation analysis"
+      ]
+    },
+    memory: {
+      title: "Memory",
+      icon: <MdMemory size={48} />,
+      description: "Strengthen your memory capacity and recall speed through proven techniques.",
+      benefits: [
+        "Enhanced memory retention",
+        "Faster recall speed",
+        "Improved working memory",
+        "Better long-term storage"
+      ],
+      exercises: [
+        "Memory palace techniques",
+        "Spaced repetition drills",
+        "Chunking exercises"
+      ]
+    }
+  };
+
+  const data = abilityData[ability];
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="relative bg-gradient-to-br from-slate-900/95 to-teal-900/90 rounded-2xl border-2 border-emerald-500/40 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-emerald-500/20"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/50 flex items-center justify-center text-emerald-300 hover:text-white transition-all z-10"
+        >
+          ✕
+        </button>
+
+        {/* Header */}
+        <div className="p-6 md:p-8 border-b border-emerald-500/30">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="text-emerald-400">
+              {data.icon}
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-emerald-100 uppercase tracking-wide">
+              {data.title}
+            </h2>
+          </div>
+          <p className="text-sm md:text-base text-gray-300 leading-relaxed">
+            {data.description}
+          </p>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 md:p-8 space-y-6">
+          {/* Benefits */}
+          <div>
+            <h3 className="text-lg font-bold text-emerald-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <span className="text-xl">🎯</span> Key Benefits
+            </h3>
+            <ul className="space-y-2">
+              {data.benefits.map((benefit, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm text-gray-300">
+                  <span className="text-emerald-400 mt-0.5">•</span>
+                  <span>{benefit}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Exercises */}
+          <div>
+            <h3 className="text-lg font-bold text-emerald-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <span className="text-xl">💪</span> Training Exercises
+            </h3>
+            <ul className="space-y-2">
+              {data.exercises.map((exercise, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm text-gray-300">
+                  <span className="text-emerald-400 mt-0.5">→</span>
+                  <span>{exercise}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Action Button */}
+          <div className="pt-4">
+            <button className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50">
+              Start Training Session
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default TrainingFloor;
