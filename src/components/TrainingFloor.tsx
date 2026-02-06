@@ -349,60 +349,60 @@ const AbilityModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-3 sm:p-4"
       onClick={onClose}
     >
       <div
-        className="bg-gradient-to-br from-slate-900 to-teal-900 border border-emerald-500/40 rounded-2xl max-w-xl w-full p-6"
+        className="bg-gradient-to-br from-slate-900 to-teal-900 border border-emerald-500/40 rounded-xl sm:rounded-2xl max-w-xl w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* CLOSE */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-9 h-9
+          className="sticky top-0 float-right w-8 h-8 sm:w-9 sm:h-9
                      rounded-full border border-emerald-400/40
-                     text-emerald-300 hover:bg-emerald-400/10"
+                     text-emerald-300 hover:bg-emerald-400/10 flex items-center justify-center text-lg sm:text-xl z-10 bg-slate-900/80"
         >
           ✕
         </button>
 
         {/* HEADER */}
-        <div className="flex items-center gap-4 mb-4 text-emerald-300">
-          {data.icon}
-          <h2 className="text-3xl font-bold uppercase tracking-wide">
+        <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4 text-emerald-300 pr-10">
+          <span className="text-3xl sm:text-4xl">{data.icon}</span>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-wide">
             {data.title}
           </h2>
         </div>
 
-        <p className="text-gray-300 mb-6">{data.description}</p>
+        <p className="text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base">{data.description}</p>
 
-        <div className="h-px bg-emerald-500/20 mb-6" />
+        <div className="h-px bg-emerald-500/20 mb-4 sm:mb-6" />
 
         {/* BENEFITS */}
-        <div className="mb-6">
-          <h3 className="text-sm font-bold uppercase text-emerald-400 mb-3">
+        <div className="mb-4 sm:mb-6">
+          <h3 className="text-xs sm:text-sm font-bold uppercase text-emerald-400 mb-2 sm:mb-3">
             🎯 Key Benefits
           </h3>
-          <ul className="space-y-2 text-sm text-gray-200">
+          <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-200">
             {data.benefits.map((b, i) => (
               <li key={i} className="flex gap-2">
-                <span className="text-emerald-400">•</span>
-                {b}
+                <span className="text-emerald-400 flex-shrink-0">•</span>
+                <span>{b}</span>
               </li>
             ))}
           </ul>
         </div>
 
         {/* EXERCISES */}
-        <div className="mb-8">
-          <h3 className="text-sm font-bold uppercase text-emerald-400 mb-3">
+        <div className="mb-6 sm:mb-8">
+          <h3 className="text-xs sm:text-sm font-bold uppercase text-emerald-400 mb-2 sm:mb-3">
             💪 Training Exercises
           </h3>
-          <ul className="space-y-2 text-sm text-gray-200">
+          <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-200">
             {data.exercises.map((e, i) => (
               <li key={i} className="flex gap-2">
-                <span className="text-emerald-400">→</span>
-                {e}
+                <span className="text-emerald-400 flex-shrink-0">→</span>
+                <span>{e}</span>
               </li>
             ))}
           </ul>
@@ -410,9 +410,9 @@ const AbilityModal = ({
 
         <button
           onClick={onStartTraining}
-          className="w-full py-4 rounded-2xl
+          className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl
                            bg-gradient-to-r from-emerald-500 to-teal-500
-                           font-bold uppercase tracking-wide hover:from-emerald-600 hover:to-teal-600 transition-colors"
+                           font-bold uppercase tracking-wide hover:from-emerald-600 hover:to-teal-600 transition-colors text-sm sm:text-base"
         >
           Start Training Session
         </button>
