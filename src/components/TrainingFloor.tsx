@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import BrainShowpiece from "./interactive-brain/BrainShowpiece";
+import CreativityModule from "./modules/CreativityModule";
 import { GiBrain, GiProcessor } from "react-icons/gi";
 import { MdMemory } from "react-icons/md";
 import { FaHeartbeat, FaLightbulb, FaMicrophone } from "react-icons/fa";
@@ -144,6 +145,31 @@ const abilityData: Record<
 
 const TrainingFloor = () => {
   const [selectedAbility, setSelectedAbility] = useState<string | null>(null);
+  const [trainingActive, setTrainingActive] = useState(false);
+
+  const handleTrainingComplete = (score: number, profile: any) => {
+    console.log("Training complete!", { score, profile });
+    // Here you can save the score to your brain metrics
+    setTrainingActive(false);
+    setSelectedAbility(null);
+  };
+
+  const handleStartTraining = () => {
+    setTrainingActive(true);
+  };
+
+  // Show CreativityModule if training is active for creativity
+  if (trainingActive && selectedAbility === 'creativity') {
+    return (
+      <CreativityModule 
+        onComplete={handleTrainingComplete}
+        onBack={() => {
+          setTrainingActive(false);
+          setSelectedAbility(null);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-gradient-to-b from-slate-900/60 to-teal-900/30 backdrop-blur-xl text-white overflow-hidden relative">
@@ -261,6 +287,7 @@ const TrainingFloor = () => {
         <AbilityModal
           ability={selectedAbility}
           onClose={() => setSelectedAbility(null)}
+          onStartTraining={handleStartTraining}
         />
       )}
     </div>
@@ -311,9 +338,11 @@ const SuggestionCard = ({ title, desc }: { title: string; desc: string }) => (
 const AbilityModal = ({
   ability,
   onClose,
+  onStartTraining,
 }: {
   ability: string;
   onClose: () => void;
+  onStartTraining: () => void;
 }) => {
   const data = abilityData[ability];
   if (!data) return null;
@@ -380,9 +409,10 @@ const AbilityModal = ({
         </div>
 
         <button
+          onClick={onStartTraining}
           className="w-full py-4 rounded-2xl
                            bg-gradient-to-r from-emerald-500 to-teal-500
-                           font-bold uppercase tracking-wide"
+                           font-bold uppercase tracking-wide hover:from-emerald-600 hover:to-teal-600 transition-colors"
         >
           Start Training Session
         </button>
