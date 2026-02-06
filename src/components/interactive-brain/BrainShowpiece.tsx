@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useState, useEffect, Suspense } from 'react';
+import { useRef, useMemo, useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, Float, Stars } from '@react-three/drei';
 import * as THREE from 'three';
@@ -102,7 +102,7 @@ export default function BrainShowpiece() {
         <ambientLight intensity={0.1} />
 
         <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-          <BrainModel />
+          <BrainModel scale={modelScale} />
         </Float>
 
           {/* Post-processing is key for the neon glow */}
