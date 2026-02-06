@@ -154,13 +154,13 @@ const Progress = () => {
       >
         {/* Header */}
         <motion.div variants={itemVariants} className="mb-8">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-3">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-teal-500/50">
                 <BarChart3 className="text-white" size={24} />
               </div>
               <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                   Your Progress
                 </h1>
                 <p className="text-gray-500 text-sm">Track your cognitive training journey</p>
@@ -168,14 +168,14 @@ const Progress = () => {
             </div>
             
             {/* Period Selector */}
-            <div className="flex gap-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-1">
+            <div className="flex gap-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-1 w-full md:w-auto">
               {['day', 'week', 'month', 'year'].map((period) => (
                 <motion.button
                   key={period}
                   onClick={() => setSelectedPeriod(period)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all capitalize ${
+                  className={`flex-1 md:flex-none px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-all capitalize ${
                     selectedPeriod === period
                       ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg'
                       : 'text-gray-400 hover:text-gray-200'
@@ -936,7 +936,7 @@ const Progress = () => {
           </div>
 
           {/* Legend and Stats */}
-          <div className="mt-6 pt-5 border-t border-white/10 flex items-center justify-between">
+          <div className="mt-6 pt-5 border-t border-white/10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-xs text-gray-400">
               <span className="font-medium">Less</span>
               <div className="flex items-center gap-1.5">
@@ -949,18 +949,18 @@ const Progress = () => {
               <span className="font-medium">More</span>
             </div>
 
-            <div className="flex items-center gap-8 text-xs">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 lg:gap-8 text-xs w-full lg:w-auto">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-teal-400" />
-                <span className="text-gray-400">Current Streak: <span className="text-white font-bold">14 days</span></span>
+                <div className="w-2 h-2 rounded-full bg-teal-400 flex-shrink-0" />
+                <span className="text-gray-400 whitespace-nowrap">Current Streak: <span className="text-white font-bold">14 days</span></span>
               </div>
               <div className="flex items-center gap-2">
-                <Trophy size={14} className="text-yellow-400" />
-                <span className="text-gray-400">Longest: <span className="text-white font-bold">28 days</span></span>
+                <Trophy size={14} className="text-yellow-400 flex-shrink-0" />
+                <span className="text-gray-400 whitespace-nowrap">Longest: <span className="text-white font-bold">28 days</span></span>
               </div>
               <div className="flex items-center gap-2">
-                <TrendingUp size={14} className="text-green-400" />
-                <span className="text-gray-400">Avg/week: <span className="text-white font-bold">5.2 days</span></span>
+                <TrendingUp size={14} className="text-green-400 flex-shrink-0" />
+                <span className="text-gray-400 whitespace-nowrap">Avg/week: <span className="text-white font-bold">5.2 days</span></span>
               </div>
             </div>
           </div>
