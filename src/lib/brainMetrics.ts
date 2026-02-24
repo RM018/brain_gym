@@ -2,11 +2,12 @@
 
 export interface SessionData {
   timestamp: Date;
-  moduleType: 'cmi' | 'leadership' | 'conflict' | 'sensory' | 'creativity';
+  moduleType: 'cmi' | 'leadership' | 'conflict' | 'sensory' | 'creativity' | 'memory' | 'pattern';
   score: number;
   duration: number;
   subscores?: Record<string, number>;
 }
+
 
 export interface PerformanceTrend {
   date: Date;

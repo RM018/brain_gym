@@ -11,6 +11,7 @@ export default {
         'neon-pink': '#ec4899',
         'neon-blue': '#3b82f6',
         'neon-green': '#10b981',
+        'neon-yellow': '#fbbf24',
         'neuro-darker': '#0a0e27',
       },
     },
