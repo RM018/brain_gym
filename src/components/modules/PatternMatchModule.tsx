@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
+import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { GiUpgrade, GiMountaintop } from 'react-icons/gi';
+import { MdTrendingUp } from 'react-icons/md';
 
 export interface PatternMatchModuleProps {
   onComplete: (score: number, profile: any) => void;
@@ -246,28 +249,32 @@ export default function PatternMatchModule({ onComplete, onBack }: PatternMatchM
                     label: 'Easy',
                     desc: 'Basic patterns',
                     color: 'from-green-500 to-emerald-600',
+                    icon: MdTrendingUp,
                   },
                   {
                     key: 'medium',
                     label: 'Medium',
                     desc: 'Intermediate patterns',
                     color: 'from-orange-500 to-yellow-600',
+                    icon: GiUpgrade,
                   },
                   {
                     key: 'hard',
                     label: 'Hard',
                     desc: 'Complex patterns',
                     color: 'from-purple-500 to-pink-600',
+                    icon: GiMountaintop,
                   },
                 ] as const
-              ).map(({ key, label, desc, color }) => (
+              ).map(({ key, label, desc, color, icon: Icon }) => (
                 <motion.button
                   key={key}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => initializeGame(key)}
-                  className={`px-6 py-4 sm:py-6 bg-gradient-to-r ${color} hover:shadow-lg hover:shadow-orange-500/50 rounded-xl sm:rounded-2xl text-white font-bold transition`}
+                  className={`px-6 py-4 sm:py-6 bg-gradient-to-r ${color} hover:shadow-lg hover:shadow-orange-500/50 rounded-xl sm:rounded-2xl text-white font-bold transition flex flex-col items-center`}
                 >
+                  <Icon className="text-3xl sm:text-4xl mb-2" />
                   <div className="text-lg sm:text-xl">{label}</div>
                   <div className="text-xs sm:text-sm text-white/80">{desc}</div>
                 </motion.button>
@@ -433,8 +440,16 @@ export default function PatternMatchModule({ onComplete, onBack }: PatternMatchM
                     : 'bg-red-500/10 border-red-400 text-red-300'
                 }`}
               >
-                <div className="font-bold text-xs sm:text-sm mb-1">
-                  {feedbackCorrect ? '✓ Correct!' : '✗ Incorrect'}
+                <div className="font-bold text-xs sm:text-sm mb-1 flex items-center gap-2">
+                  {feedbackCorrect ? (
+                    <>
+                      <FaCheckCircle className="text-lg" /> Correct!
+                    </>
+                  ) : (
+                    <>
+                      <FaTimesCircle className="text-lg" /> Incorrect
+                    </>
+                  )}
                 </div>
                 <div className="text-xs sm:text-sm">{currentPuzzle.explanation}</div>
               </motion.div>

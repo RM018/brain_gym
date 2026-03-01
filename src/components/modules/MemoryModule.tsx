@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
+import { FaStar, FaBullseye, FaRocket, FaPalette, FaLightbulb, FaMask, FaGuitar, FaDice, FaTrophy, FaBolt } from 'react-icons/fa';
+import { GiBrain } from 'react-icons/gi';
+import { MdAutoAwesome, MdMusicNote } from 'react-icons/md';
 
 export interface MemoryModuleProps {
   onComplete: (score: number, profile: any) => void;
@@ -11,10 +14,27 @@ export interface MemoryModuleProps {
 
 interface Card {
   id: number;
-  symbol: string;
+  symbolId: string;
   flipped: boolean;
   matched: boolean;
 }
+
+const symbolIcons: Record<string, React.ComponentType<any>> = {
+  star: FaStar,
+  target: FaBullseye,
+  rocket: FaRocket,
+  palette: FaPalette,
+  brain: GiBrain,
+  lightbulb: FaLightbulb,
+  mask: FaMask,
+  guitar: FaGuitar,
+  dice: FaDice,
+  trophy: FaTrophy,
+  bolt: FaBolt,
+  music: MdMusicNote,
+};
+
+const symbolIds = ['star', 'target', 'rocket', 'palette', 'brain', 'lightbulb', 'mask', 'guitar', 'dice', 'trophy', 'bolt', 'music'];
 
 export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) {
   const [gameStarted, setGameStarted] = useState(false);
@@ -27,7 +47,7 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
   const [gameOver, setGameOver] = useState(false);
   const [showResults, setShowResults] = useState(false);
 
-  const symbols = ['🌟', '🎯', '🚀', '🎨', '🧠', '💡', '🎭', '🎪', '🎸', '🎲', '🏆', '⚡'];
+
 
   const difficultyConfig = {
     easy: { pairs: 6, time: 120 },
@@ -60,12 +80,12 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
   const initializeGame = (selectedDifficulty: 'easy' | 'medium' | 'hard') => {
     setDifficulty(selectedDifficulty);
     const config = difficultyConfig[selectedDifficulty];
-    const selectedSymbols = symbols.slice(0, config.pairs);
-    const shuffledCards = [...selectedSymbols, ...selectedSymbols]
+    const selectedSymbolIds = symbolIds.slice(0, config.pairs);
+    const shuffledCards = [...selectedSymbolIds, ...selectedSymbolIds]
       .sort(() => Math.random() - 0.5)
-      .map((symbol, index) => ({
+      .map((symbolId, index) => ({
         id: index,
-        symbol,
+        symbolId,
         flipped: false,
         matched: false,
       }));
@@ -88,7 +108,7 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
       setMoves((m) => m + 1);
 
       setTimeout(() => {
-        if (cards[newFlipped[0]].symbol === cards[newFlipped[1]].symbol) {
+        if (cards[newFlipped[0]].symbolId === cards[newFlipped[1]].symbolId) {
           setMatched((prev) => [...prev, ...newFlipped]);
         }
         setFlipped([]);
@@ -138,18 +158,19 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               {(
                 [
-                  { key: 'easy', label: 'Easy', desc: '6 pairs, 2 min', color: 'from-green-500 to-emerald-600' },
-                  { key: 'medium', label: 'Medium', desc: '8 pairs, 3 min', color: 'from-blue-500 to-cyan-600' },
-                  { key: 'hard', label: 'Hard', desc: '12 pairs, 4 min', color: 'from-purple-500 to-pink-600' },
+                  { key: 'easy', label: 'Easy', desc: '6 pairs, 2 min', color: 'from-green-500 to-emerald-600', icon: FaStar },
+                  { key: 'medium', label: 'Medium', desc: '8 pairs, 3 min', color: 'from-blue-500 to-cyan-600', icon: FaBullseye },
+                  { key: 'hard', label: 'Hard', desc: '12 pairs, 4 min', color: 'from-purple-500 to-pink-600', icon: FaTrophy },
                 ] as const
-              ).map(({ key, label, desc, color }) => (
+              ).map(({ key, label, desc, color, icon: Icon }) => (
                 <motion.button
                   key={key}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => initializeGame(key)}
-                  className={`px-6 py-4 sm:py-6 bg-gradient-to-r ${color} hover:shadow-lg hover:shadow-purple-500/50 rounded-xl sm:rounded-2xl text-white font-bold transition`}
+                  className={`px-6 py-4 sm:py-6 bg-gradient-to-r ${color} hover:shadow-lg hover:shadow-purple-500/50 rounded-xl sm:rounded-2xl text-white font-bold transition flex flex-col items-center`}
                 >
+                  <Icon className="text-3xl sm:text-4xl mb-2" />
                   <div className="text-lg sm:text-xl">{label}</div>
                   <div className="text-xs sm:text-sm text-white/80">{desc}</div>
                 </motion.button>
@@ -264,7 +285,7 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
           animate={{ opacity: 1, scale: 1 }}
           className="text-center"
         >
-          <div className="text-4xl sm:text-5xl mb-4">✨</div>
+          <MdAutoAwesome className="text-4xl sm:text-5xl mb-4 text-cyan-400 mx-auto" />
           <h2 className="text-2xl sm:text-3xl font-bold text-cyan-400 mb-2">Game Complete!</h2>
           <p className="text-gray-300">Calculating results...</p>
         </motion.div>
@@ -314,7 +335,7 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
                 onClick={() => handleCardClick(card.id)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`w-full aspect-square rounded-lg sm:rounded-xl cursor-pointer font-bold transition-all ${
+                className={`w-full aspect-square rounded-lg sm:rounded-xl cursor-pointer font-bold transition-all flex items-center justify-center ${
                   matched.includes(card.id)
                     ? 'bg-green-500/20 border-2 border-green-400'
                     : flipped.includes(card.id)
@@ -322,9 +343,14 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
                       : 'bg-purple-900/40 border-2 border-purple-500/50 hover:bg-purple-900/60'
                 }`}
               >
-                <div className="flex items-center justify-center h-full text-xl sm:text-3xl md:text-4xl">
-                  {flipped.includes(card.id) || matched.includes(card.id) ? card.symbol : '?'}
-                </div>
+                {flipped.includes(card.id) || matched.includes(card.id) ? (
+                  (() => {
+                    const IconComponent = symbolIcons[card.symbolId];
+                    return <IconComponent className="text-2xl sm:text-4xl md:text-5xl text-white" />;
+                  })()
+                ) : (
+                  <span className="text-xl sm:text-3xl md:text-4xl">?</span>
+                )}
               </motion.div>
             ))}
           </div>

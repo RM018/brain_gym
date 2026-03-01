@@ -9,6 +9,7 @@ import ConflictModule from "./modules/ConflictModule";
 import SensoryModule from "./modules/SensoryModule";
 import MemoryModule from "./modules/MemoryModule";
 import PatternMatchModule from "./modules/PatternMatchModule";
+import VoiceValueModule from "./modules/VoiceValueModule";
 import { GiBrain, GiProcessor } from "react-icons/gi";
 import { MdMemory } from "react-icons/md";
 import { FaHeartbeat, FaLightbulb, FaMicrophone } from "react-icons/fa";
@@ -268,6 +269,19 @@ const TrainingFloor = () => {
   if (trainingActive && selectedAbility === 'pattern') {
     return (
       <PatternMatchModule 
+        onComplete={handleTrainingComplete}
+        onBack={() => {
+          setTrainingActive(false);
+          setSelectedAbility(null);
+        }}
+      />
+    );
+  }
+
+  // Show VoiceValueModule if training is active for voice
+  if (trainingActive && selectedAbility === 'voice') {
+    return (
+      <VoiceValueModule 
         onComplete={handleTrainingComplete}
         onBack={() => {
           setTrainingActive(false);
