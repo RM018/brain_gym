@@ -139,6 +139,12 @@ export default function CmiModule({ onComplete, onBack }: CmiModuleProps) {
     return () => clearTimeout(timer);
   }, [gameState.gamePhase, gameState.timeLeft]);
 
+  useEffect(() => {
+    if (gameState.gamePhase === 'gameOver' && gameState.results) {
+      onComplete(gameState.results.finalScore, gameState.results);
+    }
+  }, [gameState.gamePhase, gameState.results, onComplete]);
+
   const handleCellClick = (row: number, col: number) => {
     if (gameState.gamePhase !== 'recall') return;
 
