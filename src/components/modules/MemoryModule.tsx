@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
+import { ScoringEngine } from '@/lib/scoringEngine';
 import { FaStar, FaBullseye, FaRocket, FaPalette, FaLightbulb, FaMask, FaGuitar, FaDice, FaTrophy, FaBolt } from 'react-icons/fa';
 import { GiBrain } from 'react-icons/gi';
 import { MdAutoAwesome, MdMusicNote } from 'react-icons/md';
@@ -46,8 +47,6 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
   const [time, setTime] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [showResults, setShowResults] = useState(false);
-
-
 
   const difficultyConfig = {
     easy: { pairs: 6, time: 120 },
@@ -114,17 +113,6 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
         setFlipped([]);
       }, 1000);
     }
-  };
-
-  const calculateScore = () => {
-    const config = difficultyConfig[difficulty];
-    const totalPairs = config.pairs;
-    const pairsMatched = matched.length / 2;
-    const timeBonus = Math.max(0, config.time - time) * 2;
-    const moveEfficiency = Math.max(0, (totalPairs - (moves - totalPairs)) / totalPairs) * 300;
-    const pairScore = (pairsMatched / totalPairs) * 600;
-
-    return Math.round(pairScore + moveEfficiency + timeBonus);
   };
 
   if (!gameStarted) {
@@ -196,31 +184,36 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
   }
 
   if (gameOver) {
-    const score = calculateScore();
     const totalPairs = difficultyConfig[difficulty].pairs;
     const pairsMatched = matched.length / 2;
 
-    const profile = {
-      memoryRetention: (pairsMatched / totalPairs) * 100,
-      reactionTime: moves > 0 ? (time / moves) * 1000 : 0,
-      workingMemory: (pairsMatched / totalPairs) * 100,
-    };
+    const scoring = new ScoringEngine();
+    const moduleScore = scoring.calculateMemoryScore(
+      pairsMatched,
+      totalPairs,
+      moves,
+      time,
+      difficulty
+    );
 
     try {
       const aggregator = new BrainMetricsAggregator();
       aggregator.addSession({
         timestamp: new Date(),
         moduleType: 'memory',
-        score: score,
+        score: moduleScore.normalizedScore,
         duration: time,
-        subscores: {
-          ...profile,
-          difficulty: difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3,
-        },
+        subscores: moduleScore.subscores,
       });
     } catch (e) {
       console.error('Failed to save session:', e);
     }
+
+    const profile = {
+      memoryRetention: (pairsMatched / totalPairs) * 100,
+      reactionTime: moves > 0 ? (time / moves) * 1000 : 0,
+      workingMemory: (pairsMatched / totalPairs) * 100,
+    };
 
     if (showResults) {
       return (
@@ -237,7 +230,7 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
               <div className="bg-[#041517]/60 border border-purple-400/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl text-center">
                 <div className="text-xs sm:text-sm text-gray-400 mb-2">Final Score</div>
-                <div className="text-4xl sm:text-5xl font-bold text-purple-400">{score}</div>
+                <div className="text-4xl sm:text-5xl font-bold text-purple-400">{moduleScore.normalizedScore}</div>
               </div>
 
               <div className="bg-[#041517]/60 border border-purple-400/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl">
@@ -266,7 +259,7 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => onComplete(score, profile)}
+              onClick={() => onComplete(moduleScore.normalizedScore, profile)}
               className="w-full px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-full text-base sm:text-lg font-bold"
             >
               Continue

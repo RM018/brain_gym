@@ -9,6 +9,13 @@ export interface ModuleScore {
   timestamp: Date;
 }
 
+// Helper config for memory difficulty
+const difficultyConfig = {
+  easy: { pairs: 6, time: 120 },
+  medium: { pairs: 8, time: 180 },
+  hard: { pairs: 12, time: 240 },
+};
+
 export class ScoringEngine {
   // Calculate CMI Module Score
   calculateCMIScore(monitor: PerformanceMonitor): ModuleScore {
@@ -176,6 +183,76 @@ export class ScoringEngine {
         originality: originalityScore,
         associativeThinking: semanticDistance,
         conceptualFluency: divergentThinking,
+      },
+      timestamp: new Date(),
+    };
+  }
+
+  // Memory Module Score
+  calculateMemoryScore(
+    pairsMatched: number,
+    totalPairs: number,
+    moves: number,
+    time: number,
+    difficulty: 'easy' | 'medium' | 'hard'
+  ): ModuleScore {
+    const accuracy = totalPairs > 0 ? (pairsMatched / totalPairs) * 100 : 0;
+    const efficiency = totalPairs > 0
+      ? Math.max(0, ((totalPairs - Math.max(0, moves - totalPairs)) / totalPairs) * 100)
+      : 0;
+    const timeBonus = Math.max(0, (difficultyConfig[difficulty].time - time) / difficultyConfig[difficulty].time * 100);
+
+    const rawScore = accuracy * 0.5 + efficiency * 0.3 + timeBonus * 0.2;
+    return {
+      rawScore,
+      normalizedScore: Math.min(100, Math.max(0, rawScore)),
+      subscores: {
+        accuracy,
+        efficiency,
+        timeBonus,
+        memoryRetention: accuracy,
+        focusStability: efficiency,
+      },
+      timestamp: new Date(),
+    };
+  }
+
+  // Pattern Match Module Score (fixed unused parameter)
+  calculatePatternScore(
+    accuracy: number,
+    speed: number,
+    _difficulty: 'easy' | 'medium' | 'hard' // prefixed with underscore to indicate intentional non-use
+  ): ModuleScore {
+    const rawScore = accuracy * 0.7 + speed * 0.3;
+    return {
+      rawScore,
+      normalizedScore: Math.min(100, Math.max(0, rawScore)),
+      subscores: {
+        accuracy,
+        speed,
+        patternRecognition: accuracy,
+        processingSpeed: speed,
+      },
+      timestamp: new Date(),
+    };
+  }
+
+  // Voice & Value Module Score
+  calculateVoiceValueScore(
+    totalScore: number,
+    consistency: number,
+    alignment: number
+  ): ModuleScore {
+    const rawScore = totalScore * 0.4 + consistency * 0.3 + alignment * 0.3;
+    return {
+      rawScore,
+      normalizedScore: Math.min(100, Math.max(0, rawScore)),
+      subscores: {
+        totalScore,
+        consistency,
+        alignment,
+        valuesAlignment: alignment,
+        emotionalRegulation: consistency,
       },
       timestamp: new Date(),
     };

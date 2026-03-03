@@ -7,9 +7,11 @@ export interface SessionData {
     | "leadership"
     | "conflict"
     | "sensory"
+    | "voicevalue"
     | "creativity"
     | "memory"
     | "pattern";
+    
   score: number;
   duration: number;
   subscores?: Record<string, number>;

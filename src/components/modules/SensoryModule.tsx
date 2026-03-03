@@ -332,7 +332,7 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
               whileTap={{ scale: 0.95 }}
               onClick={startGame}
               className="flex-1 px-8 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-full text-base sm:text-lg md:text-xl font-bold shadow-lg"
-              >
+            >
               START MODULE
             </motion.button>
           </div>

@@ -1,7 +1,9 @@
- 'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ScoringEngine } from '@/lib/scoringEngine';
+import { BrainMetricsAggregator } from '@/lib/brainMetrics';
 
 export interface LeadershipModuleProps {
   onComplete: (score: number, decisions: DecisionData[]) => void;
@@ -323,6 +325,8 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
   const [integrityScore, setIntegrityScore] = useState(50);
   const [effectivenessScore, setEffectivenessScore] = useState(50);
   const [confidenceScore, setConfidenceScore] = useState(50);
+  const [teamMorale, setTeamMorale] = useState(50);
+  const [trustScore, setTrustScore] = useState(50);
   const [decisions, setDecisions] = useState<DecisionData[]>([]);
   const [decisionStartTime, setDecisionStartTime] = useState(0);
   const [showResult, setShowResult] = useState(false);
@@ -378,6 +382,10 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
     setEffectivenessScore(prev => Math.max(0, Math.min(100, prev + option.impact.effectiveness * diffMultiplier)));
     setConfidenceScore(prev => Math.max(0, Math.min(100, prev + option.impact.confidence * diffMultiplier)));
 
+    // Update team morale and trust based on decision impact
+    setTeamMorale(prev => Math.max(0, Math.min(100, prev + option.impact.integrity * 0.5)));
+    setTrustScore(prev => Math.max(0, Math.min(100, prev + option.impact.leadership * 0.5)));
+
     // Record special events
     if (option.impact.special) {
       setSpecialEvents(prev => [...prev, option.impact.special!]);
@@ -415,13 +423,32 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
           setTimeLeft(30);
         }
       } else {
-        // Game complete - show final results
-        const calculatedFinalScore = (leadershipScore + integrityScore + effectivenessScore + confidenceScore) / 4;
-        setFinalScore(calculatedFinalScore);
+        // Game complete - use ScoringEngine
+        const scoring = new ScoringEngine();
+        const moduleScore = scoring.calculateLeadershipScore(
+          decisions,
+          teamMorale,
+          trustScore
+        );
+
+        try {
+          const aggregator = new BrainMetricsAggregator();
+          aggregator.addSession({
+            timestamp: new Date(),
+            moduleType: 'leadership',
+            score: moduleScore.normalizedScore,
+            duration: performance.now() - decisionStartTime,
+            subscores: moduleScore.subscores,
+          });
+        } catch (e) {
+          console.error('Failed to save session:', e);
+        }
+
+        setFinalScore(moduleScore.normalizedScore);
         setShowFinalResults(true);
         
         setTimeout(() => {
-          onComplete(calculatedFinalScore, decisions);
+          onComplete(moduleScore.normalizedScore, decisions);
         }, 5000);
       }
     }, 2500);
@@ -766,7 +793,7 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
                       }`}
                     >
                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                      <div className="flex-1 pr-2">{option.text}</div>
+                        <div className="flex-1 pr-2">{option.text}</div>
                         <div className={`px-2 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
                           option.riskLevel === 'high' 
                             ? 'bg-red-500/20 text-red-400' 

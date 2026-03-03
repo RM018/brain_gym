@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { ScoringEngine } from '@/lib/scoringEngine';
+import { BrainMetricsAggregator } from '@/lib/brainMetrics';
 
 export interface VoiceValueModuleProps {
   onComplete: (score: number, profile: any) => void;
@@ -198,11 +200,13 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
   const [valueScores, setValueScores] = useState<{ [key: string]: number }>({});
   const [timeRemaining, setTimeRemaining] = useState(10);
   const [timerActive, setTimerActive] = useState(false);
+  const [totalTime, setTotalTime] = useState(0);
 
   useEffect(() => {
     if (!timerActive || timeRemaining <= 0) return;
     const timer = setInterval(() => {
       setTimeRemaining(t => t - 1);
+      setTotalTime(prev => prev + 1);
     }, 1000);
     return () => clearInterval(timer);
   }, [timerActive, timeRemaining]);
@@ -259,17 +263,38 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
 
   const completeGame = () => {
     setTimerActive(false);
-    const totalScore = Object.values(scenarioScores).reduce((a, b) => a + b, 0);
+    const totalRawScore = Object.values(scenarioScores).reduce((a, b) => a + b, 0);
+    const consistency = calculateConsistency();
+    const alignment = calculateAlignment();
+
+    // Use ScoringEngine
+    const scoring = new ScoringEngine();
+    const moduleScore = scoring.calculateVoiceValueScore(totalRawScore, consistency, alignment);
+
+    try {
+      const aggregator = new BrainMetricsAggregator();
+      aggregator.addSession({
+        timestamp: new Date(),
+        moduleType: 'voicevalue',
+        score: moduleScore.normalizedScore,
+        duration: totalTime,
+        subscores: moduleScore.subscores,
+      });
+    } catch (e) {
+      console.error('Failed to save session:', e);
+    }
+
     const profile = {
       selectedValues,
       valueScores,
       scenarioScores,
-      consistency: calculateConsistency(),
-      alignment: calculateAlignment()
+      consistency,
+      alignment
     };
+
     setGamePhase('results');
     setTimeout(() => {
-      onComplete(totalScore, profile);
+      onComplete(moduleScore.normalizedScore, profile);
     }, 4000);
   };
 
@@ -437,8 +462,13 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
   }
 
   if (gamePhase === 'results') {
-    const totalScore = Object.values(scenarioScores).reduce((a, b) => a + b, 0);
+    const totalRawScore = Object.values(scenarioScores).reduce((a, b) => a + b, 0);
     const consistency = calculateConsistency();
+    const alignment = calculateAlignment();
+
+    // Recalculate moduleScore for display (or we could store it in state)
+    const scoring = new ScoringEngine();
+    const moduleScore = scoring.calculateVoiceValueScore(totalRawScore, consistency, alignment);
 
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-slate-900/95 to-indigo-900/40 p-4">
@@ -463,8 +493,8 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
 
           <div className="grid grid-cols-2 gap-4 mb-8">
             <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl p-4">
-              <div className="text-3xl font-bold text-violet-400">{totalScore}</div>
-              <div className="text-sm text-gray-400 mt-1">Total Score</div>
+              <div className="text-3xl font-bold text-violet-400">{moduleScore.normalizedScore}</div>
+              <div className="text-sm text-gray-400 mt-1">Overall Score</div>
             </div>
             <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4">
               <div className="text-3xl font-bold text-cyan-400">{consistency}</div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
+import { ScoringEngine } from '@/lib/scoringEngine';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { GiUpgrade, GiMountaintop } from 'react-icons/gi';
 import { MdTrendingUp } from 'react-icons/md';
@@ -19,6 +20,111 @@ interface PatternPuzzle {
   explanation: string;
 }
 
+const puzzles: Record<'easy' | 'medium' | 'hard', PatternPuzzle[]> = {
+  easy: [
+    {
+      sequence: [2, 4, 6, 8, '?'],
+      options: [10, 12, 14, 16],
+      correct: 10,
+      explanation: 'This is a sequence adding 2 each time (arithmetic sequence)',
+    },
+    {
+      sequence: [1, 2, 4, 8, '?'],
+      options: [12, 14, 16, 20],
+      correct: 16,
+      explanation: 'Each number is doubled (geometric sequence)',
+    },
+    {
+      sequence: [5, 5, 5, 5, '?'],
+      options: [5, 6, 4, 7],
+      correct: 5,
+      explanation: 'All numbers are the same (constant sequence)',
+    },
+    {
+      sequence: [1, 2, 3, 4, '?'],
+      options: [5, 6, 7, 8],
+      correct: 5,
+      explanation: 'Simple counting sequence going up by 1',
+    },
+    {
+      sequence: [10, 9, 8, 7, '?'],
+      options: [5, 6, 9, 8],
+      correct: 6,
+      explanation: 'Counting down sequence decreasing by 1',
+    },
+  ],
+  medium: [
+    {
+      sequence: [1, 1, 2, 3, 5, 8, '?'],
+      options: [13, 11, 12, 14],
+      correct: 13,
+      explanation: 'Fibonacci sequence: each number is sum of previous two',
+    },
+    {
+      sequence: [2, 3, 5, 7, 11, '?'],
+      options: [13, 14, 15, 16],
+      correct: 13,
+      explanation: 'Prime numbers sequence',
+    },
+    {
+      sequence: [1, 4, 9, 16, 25, '?'],
+      options: [30, 35, 36, 40],
+      correct: 36,
+      explanation: 'Perfect squares: 1², 2², 3², 4², 5², 6²',
+    },
+    {
+      sequence: [1, 4, 9, 16, '?'],
+      options: [20, 23, 25, 30],
+      correct: 25,
+      explanation: 'Square numbers increasing: 1, 4, 9, 16, 25',
+    },
+    {
+      sequence: [2, 6, 12, 20, 30, '?'],
+      options: [40, 42, 43, 44],
+      correct: 42,
+      explanation: 'n(n+1): 1×2, 2×3, 3×4, 4×5, 5×6, 6×7',
+    },
+  ],
+  hard: [
+    {
+      sequence: [1, 2, 4, 7, 11, 16, '?'],
+      options: [22, 24, 25, 26],
+      correct: 22,
+      explanation: 'Differences increase by 1: +1, +2, +3, +4, +5, +6',
+    },
+    {
+      sequence: [2, 3, 5, 8, 12, '?'],
+      options: [16, 17, 18, 19],
+      correct: 17,
+      explanation: 'Adding 1, 2, 3, 4, 5... to get next number',
+    },
+    {
+      sequence: [1, 3, 6, 10, 15, '?'],
+      options: [19, 20, 21, 22],
+      correct: 21,
+      explanation: 'Triangular numbers: sum of consecutive integers',
+    },
+    {
+      sequence: [5, 10, 9, 14, 13, 18, '?'],
+      options: [17, 19, 20, 22],
+      correct: 17,
+      explanation: 'Alternating: +5 then -1 pattern',
+    },
+    {
+      sequence: [1, 1, 2, 6, 24, '?'],
+      options: [100, 120, 140, 160],
+      correct: 120,
+      explanation: 'Factorials: 1!, 1!, 2!, 3!, 4!, 5!',
+    },
+  ],
+};
+
+const difficultyConfig = {
+  easy: { totalPuzzles: 5, timePerPuzzle: 20 },
+  medium: { totalPuzzles: 5, timePerPuzzle: 30 },
+  hard: { totalPuzzles: 5, timePerPuzzle: 40 },
+};
+
 export default function PatternMatchModule({ onComplete, onBack }: PatternMatchModuleProps) {
   const [gameStarted, setGameStarted] = useState(false);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
@@ -31,111 +137,7 @@ export default function PatternMatchModule({ onComplete, onBack }: PatternMatchM
   const [selectedAnswer, setSelectedAnswer] = useState<string | number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackCorrect, setFeedbackCorrect] = useState(false);
-
-  const puzzles: Record<'easy' | 'medium' | 'hard', PatternPuzzle[]> = {
-    easy: [
-      {
-        sequence: [2, 4, 6, 8, '?'],
-        options: [10, 12, 14, 16],
-        correct: 10,
-        explanation: 'This is a sequence adding 2 each time (arithmetic sequence)',
-      },
-      {
-        sequence: [1, 2, 4, 8, '?'],
-        options: [12, 14, 16, 20],
-        correct: 16,
-        explanation: 'Each number is doubled (geometric sequence)',
-      },
-      {
-        sequence: [5, 5, 5, 5, '?'],
-        options: [5, 6, 4, 7],
-        correct: 5,
-        explanation: 'All numbers are the same (constant sequence)',
-      },
-      {
-        sequence: [1, 2, 3, 4, '?'],
-        options: [5, 6, 7, 8],
-        correct: 5,
-        explanation: 'Simple counting sequence going up by 1',
-      },
-      {
-        sequence: [10, 9, 8, 7, '?'],
-        options: [5, 6, 9, 8],
-        correct: 6,
-        explanation: 'Counting down sequence decreasing by 1',
-      },
-    ],
-    medium: [
-      {
-        sequence: [1, 1, 2, 3, 5, 8, '?'],
-        options: [13, 11, 12, 14],
-        correct: 13,
-        explanation: 'Fibonacci sequence: each number is sum of previous two',
-      },
-      {
-        sequence: [2, 3, 5, 7, 11, '?'],
-        options: [13, 14, 15, 16],
-        correct: 13,
-        explanation: 'Prime numbers sequence',
-      },
-      {
-        sequence: [1, 4, 9, 16, 25, '?'],
-        options: [30, 35, 36, 40],
-        correct: 36,
-        explanation: 'Perfect squares: 1², 2², 3², 4², 5², 6²',
-      },
-      {
-        sequence: [1, 4, 9, 16, '?'],
-        options: [20, 23, 25, 30],
-        correct: 25,
-        explanation: 'Square numbers increasing: 1, 4, 9, 16, 25',
-      },
-      {
-        sequence: [2, 6, 12, 20, 30, '?'],
-        options: [40, 42, 43, 44],
-        correct: 42,
-        explanation: 'n(n+1): 1×2, 2×3, 3×4, 4×5, 5×6, 6×7',
-      },
-    ],
-    hard: [
-      {
-        sequence: [1, 2, 4, 7, 11, 16, '?'],
-        options: [22, 24, 25, 26],
-        correct: 22,
-        explanation: 'Differences increase by 1: +1, +2, +3, +4, +5, +6',
-      },
-      {
-        sequence: [2, 3, 5, 8, 12, '?'],
-        options: [16, 17, 18, 19],
-        correct: 17,
-        explanation: 'Adding 1, 2, 3, 4, 5... to get next number',
-      },
-      {
-        sequence: [1, 3, 6, 10, 15, '?'],
-        options: [19, 20, 21, 22],
-        correct: 21,
-        explanation: 'Triangular numbers: sum of consecutive integers',
-      },
-      {
-        sequence: [5, 10, 9, 14, 13, 18, '?'],
-        options: [17, 19, 20, 22],
-        correct: 17,
-        explanation: 'Alternating: +5 then -1 pattern',
-      },
-      {
-        sequence: [1, 1, 2, 6, 24, '?'],
-        options: [100, 120, 140, 160],
-        correct: 120,
-        explanation: 'Factorials: 1!, 1!, 2!, 3!, 4!, 5!',
-      },
-    ],
-  };
-
-  const difficultyConfig = {
-    easy: { totalPuzzles: 5, timePerPuzzle: 20 },
-    medium: { totalPuzzles: 5, timePerPuzzle: 30 },
-    hard: { totalPuzzles: 5, timePerPuzzle: 40 },
-  };
+  const [totalTime, setTotalTime] = useState(0); // track total time spent
 
   useEffect(() => {
     if (!gameStarted || showResults) return;
@@ -169,6 +171,7 @@ export default function PatternMatchModule({ onComplete, onBack }: PatternMatchM
     setScore(0);
     setAnswered(0);
     setCorrect(0);
+    setTotalTime(0);
     setSelectedAnswer(null);
     setShowFeedback(false);
     setGameStarted(true);
@@ -187,6 +190,10 @@ export default function PatternMatchModule({ onComplete, onBack }: PatternMatchM
       const points = Math.max(10, 100 - (difficultyConfig[difficulty].timePerPuzzle - timeLeft) * 2);
       setScore((s) => s + points);
     }
+
+    // Add time spent on this question
+    const timeSpent = difficultyConfig[difficulty].timePerPuzzle - timeLeft;
+    setTotalTime((prev) => prev + timeSpent);
 
     setTimeout(() => {
       handleNextPuzzle();
@@ -301,26 +308,33 @@ export default function PatternMatchModule({ onComplete, onBack }: PatternMatchM
 
   if (showResults) {
     const accuracy = calculateAccuracy();
-    const profile = {
-      patternRecognition: accuracy,
-      analyticalThinking: (score / (puzzles[difficulty].length * 100)) * 100,
-    };
+    // Calculate speed as a normalized score (0-100)
+    // Average time per question: totalTime / answered (in seconds)
+    // We want faster = higher speed. Using a simple formula: max(0, 100 - avgTime * 2) but cap.
+    const avgTimePerQuestion = answered > 0 ? totalTime / answered : 0;
+    // Assuming 5 seconds is excellent (100), 30 seconds is poor (0)
+    const speed = Math.max(0, Math.min(100, 100 - avgTimePerQuestion * 2));
+
+    const scoring = new ScoringEngine();
+    const moduleScore = scoring.calculatePatternScore(accuracy, speed, difficulty);
 
     try {
       const aggregator = new BrainMetricsAggregator();
       aggregator.addSession({
         timestamp: new Date(),
         moduleType: 'pattern',
-        score: score,
-        duration: difficultyConfig[difficulty].timePerPuzzle * answered,
-        subscores: {
-          ...profile,
-          difficulty: difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3,
-        },
+        score: moduleScore.normalizedScore,
+        duration: totalTime,
+        subscores: moduleScore.subscores,
       });
     } catch (e) {
       console.error('Failed to save session:', e);
     }
+
+    const profile = {
+      patternRecognition: accuracy,
+      analyticalThinking: moduleScore.subscores.patternRecognition,
+    };
 
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-slate-900/95 to-teal-900/40 p-3 sm:p-4 md:p-6">
@@ -336,7 +350,7 @@ export default function PatternMatchModule({ onComplete, onBack }: PatternMatchM
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <div className="bg-[#041517]/60 border border-purple-400/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl text-center">
               <div className="text-xs sm:text-sm text-gray-400 mb-2">Final Score</div>
-              <div className="text-4xl sm:text-5xl font-bold text-purple-400">{score}</div>
+              <div className="text-4xl sm:text-5xl font-bold text-purple-400">{moduleScore.normalizedScore}</div>
             </div>
 
             <div className="bg-[#041517]/60 border border-purple-400/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl">
@@ -363,7 +377,7 @@ export default function PatternMatchModule({ onComplete, onBack }: PatternMatchM
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onComplete(score, profile)}
+            onClick={() => onComplete(moduleScore.normalizedScore, profile)}
             className="w-full px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-full text-base sm:text-lg font-bold"
           >
             Continue

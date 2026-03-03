@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { DATEngine } from '@/lib/semanticDistance';
+import { ScoringEngine } from '@/lib/scoringEngine';
+import { BrainMetricsAggregator } from '@/lib/brainMetrics';
 
 export interface CreativityModuleProps {
   onComplete: (score: number, profile: any) => void;
@@ -45,11 +47,39 @@ export default function CreativityModule({ onComplete, onBack }: CreativityModul
 
     try {
       const datResults = DATEngine.scoreDAT(words);
-      setResults(datResults);
+      const semanticDistance = datResults.score / 100; // assuming DAT score is 0-100
+      const divergentThinking = datResults.profile.divergentThinking / 100;
+      const originalityScore = datResults.profile.originalityScore / 100;
+
+      const scoring = new ScoringEngine();
+      const moduleScore = scoring.calculateCreativityScore(
+        semanticDistance,
+        divergentThinking,
+        originalityScore
+      );
+
+      try {
+        const aggregator = new BrainMetricsAggregator();
+        aggregator.addSession({
+          timestamp: new Date(),
+          moduleType: 'creativity',
+          score: moduleScore.normalizedScore,
+          duration: 0,
+          subscores: moduleScore.subscores,
+        });
+      } catch (e) {
+        console.error('Failed to save session:', e);
+      }
+
+      setResults({
+        score: moduleScore.normalizedScore,
+        profile: datResults.profile,
+        percentile: datResults.percentile,
+      });
       setShowResults(true);
 
       setTimeout(() => {
-        onComplete(datResults.score, datResults.profile);
+        onComplete(moduleScore.normalizedScore, datResults.profile);
       }, 5000);
     } catch (error: any) {
       setErrors([error.message]);
