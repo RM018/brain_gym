@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { PerformanceMonitor } from '@/lib/gameLoop';
 import { ScoringEngine } from '@/lib/scoringEngine';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
+import { useUser } from '@/lib/userContext';
 
 export interface CmiModuleProps {
   onComplete: (score: number, profile: any) => void;
@@ -44,6 +45,8 @@ interface GameSequence {
 }
 
 export default function CmiModule({ onComplete, onBack }: CmiModuleProps) {
+  const { currentUser } = useUser();
+  const [gameStartTime, setGameStartTime] = useState(0);
   const [gameState, setGameState] = useState<NeuroForgeGameState>({
     currentLevel: 1,
     score: 0,
@@ -97,6 +100,9 @@ export default function CmiModule({ onComplete, onBack }: CmiModuleProps) {
   }, []);
 
   const startNewLevel = useCallback(() => {
+    if (gameState.currentLevel === 1) {
+      setGameStartTime(performance.now());
+    }
     const newSequence = generateSequence(gameState.currentLevel);
     setGameState((prev) => ({
       ...prev,
@@ -211,14 +217,16 @@ export default function CmiModule({ onComplete, onBack }: CmiModuleProps) {
         const moduleScore = scoring.calculateAdaptiveScore(monitorRef.current, sessionHistory);
 
         try {
-          const aggregator = new BrainMetricsAggregator();
+          const aggregator = new BrainMetricsAggregator(currentUser.id);
           aggregator.addSession({
             timestamp: new Date(),
             moduleType: 'cmi',
             score: moduleScore.normalizedScore,
-            duration: gameState.currentLevel * 30 * 1000,
+            duration: performance.now() - gameStartTime,
             subscores: moduleScore.subscores,
           });
+          // Dispatch event to notify Progress component
+          window.dispatchEvent(new CustomEvent('sessions-updated', { detail: { userId: currentUser.id } }));
         } catch (e) {
           console.error('Failed to save session:', e);
         }

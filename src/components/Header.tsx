@@ -1,11 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion';
-import { User, TrendingUp, Brain, Zap } from 'lucide-react';
+import { User, TrendingUp, Brain, Zap, Bell, BellOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
     const navigate = useNavigate();
-    const [focusMode, setFocusMode] = useState(true);
+    const [focusMode, setFocusModeState] = useState(() => {
+      const saved = localStorage.getItem('focusMode');
+      return saved ? JSON.parse(saved) : true;
+    });
+
+    // Handle focus mode toggle and mute notifications
+    const setFocusMode = (value: boolean) => {
+      setFocusModeState(value);
+      localStorage.setItem('focusMode', JSON.stringify(value));
+      
+      // Dispatch custom event for other components to listen to
+      window.dispatchEvent(new CustomEvent('focusModeChanged', { 
+        detail: { focusMode: value, notificationsMuted: value } 
+      }));
+      
+      // Optional: Show toast/notification about muting
+      console.log(value ? 'Notifications muted - Focus mode enabled' : 'Notifications unmuted - Focus mode disabled');
+    };
 
   return (
     
@@ -87,6 +104,20 @@ const Header = () => {
                   <User size={22} className="hidden lg:block text-gray-400 group-hover:text-teal-300 transition-colors" />
                 </motion.button>
     
+                {/* Notifications Status Indicator */}
+                <div className="flex items-center gap-1 glass-card px-2 lg:px-3 py-2 lg:py-2.5 rounded-xl">
+                  <motion.div
+                    animate={{ opacity: focusMode ? [0.5, 1, 0.5] : 1 }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    {focusMode ? (
+                      <BellOff size={16} className="lg:w-5 lg:h-5 text-gray-400" title="Notifications muted" />
+                    ) : (
+                      <Bell size={16} className="lg:w-5 lg:h-5 text-teal-400" title="Notifications enabled" />
+                    )}
+                  </motion.div>
+                </div>
+
                 {/* Focus Mode Toggle */}
                 <div className="flex items-center gap-2 lg:gap-3 glass-card px-3 lg:px-5 py-2 lg:py-2.5 rounded-full">
                   <span className="text-xs font-bold text-teal-300 uppercase tracking-widest items-center gap-2 hidden md:flex">
@@ -95,7 +126,7 @@ const Header = () => {
                       transition={{ duration: 2, repeat: Infinity }}
                       className="w-2 h-2 rounded-full bg-teal-400"
                     />
-                    <span className="hidden md:inline">Focus Mode</span>
+                    <span className="hidden md:inline">{focusMode ? 'Focus ON' : 'Focus OFF'}</span>
                   </span>
                   <motion.button
                     onClick={() => setFocusMode(!focusMode)}
@@ -105,6 +136,7 @@ const Header = () => {
                         : 'bg-slate-700/50'
                     }`}
                     whileTap={{ scale: 0.95 }}
+                    title={focusMode ? "Focus mode enabled - notifications muted" : "Focus mode disabled - notifications enabled"}
                   >
                     <motion.div
                       animate={{ left: focusMode ? 28 : 2 }}

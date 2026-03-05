@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Brain, Zap, TrendingUp, Sparkles, Shuffle, Lightbulb, Settings as SettingsIcon, Flame } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
+import { UserProvider, useUser } from './lib/userContext';
+import { BrainMetricsAggregator } from './lib/brainMetrics';
+import type { SessionData } from './lib/brainMetrics';
 
 // External pages
 import TrainingFloor from './components/TrainingFloor';
@@ -18,7 +21,115 @@ import Header from './components/Header';
 /* ================= DASHBOARD CONTENT ================= */
 function DashboardContent() {
   const navigate = useNavigate();
-  const mentalLoad = 89;
+  const { currentUser } = useUser();
+  const [sessions, setSessions] = useState<SessionData[]>([]);
+  const aggRef = useRef<BrainMetricsAggregator | null>(null);
+
+  // Load and listen for session updates
+  useEffect(() => {
+    const agg = new BrainMetricsAggregator(currentUser.id);
+    aggRef.current = agg;
+    setSessions(agg.getSessions());
+
+    const handleSessionsUpdated = (event: any) => {
+      if (!event.detail || event.detail.userId === currentUser.id) {
+        if (aggRef.current) {
+          const updatedSessions = aggRef.current.getSessions();
+          setSessions(updatedSessions);
+        }
+      }
+    };
+
+    window.addEventListener('sessions-updated', handleSessionsUpdated);
+    return () => window.removeEventListener('sessions-updated', handleSessionsUpdated);
+  }, [currentUser.id]);
+
+  // Calculate metrics from sessions
+  const calculateMetrics = () => {
+    if (sessions.length === 0) {
+      return {
+        mentalLoad: 45,
+        avgScore: 0,
+        totalTime: 0,
+        dailyProgress: 0,
+        neuralEfficiency: 0,
+        weekScores: [0, 0, 0, 0, 0, 0, 0],
+        streakDays: 0
+      };
+    }
+
+    // Calculate average score
+    const avgScore = sessions.reduce((sum, s) => sum + s.score, 0) / sessions.length;
+    
+    // Mental load is inverse of performance
+    const mentalLoad = Math.round((100 - avgScore) * 100) / 100;
+    
+    // Total time in hours
+    const totalTime = sessions.reduce((sum, s) => sum + s.duration, 0) / 3600;
+    
+    // Neural efficiency (average score)
+    const neuralEfficiency = Math.round(avgScore);
+    
+    // Daily progress (average of last 3 sessions)
+    const dailyProgress = sessions.length > 0 
+      ? Math.round(sessions.slice(-3).reduce((sum, s) => sum + s.score, 0) / Math.min(3, sessions.length))
+      : 0;
+
+    // Week scores (last 7 days)
+    const now = new Date();
+    const weekScores = [0, 0, 0, 0, 0, 0, 0];
+    for (let i = 0; i < 7; i++) {
+      const dayDate = new Date(now);
+      dayDate.setDate(dayDate.getDate() - (6 - i));
+      dayDate.setHours(0, 0, 0, 0);
+      
+      const dayEnd = new Date(dayDate);
+      dayEnd.setHours(23, 59, 59, 999);
+      
+      const daySessions = sessions.filter(s => {
+        const sDate = new Date(s.timestamp);
+        return sDate >= dayDate && sDate <= dayEnd;
+      });
+      
+      if (daySessions.length > 0) {
+        weekScores[i] = Math.round(daySessions.reduce((sum, s) => sum + s.score, 0) / daySessions.length);
+      }
+    }
+
+    // Calculate streak
+    let streakDays = 0;
+    for (let i = 0; i < 365; i++) {
+      const dayDate = new Date(now);
+      dayDate.setDate(dayDate.getDate() - i);
+      dayDate.setHours(0, 0, 0, 0);
+      
+      const dayEnd = new Date(dayDate);
+      dayEnd.setHours(23, 59, 59, 999);
+      
+      const daySessions = sessions.filter(s => {
+        const sDate = new Date(s.timestamp);
+        return sDate >= dayDate && sDate <= dayEnd;
+      });
+      
+      if (daySessions.length > 0) {
+        streakDays++;
+      } else if (i > 0) {
+        break;
+      }
+    }
+
+    return {
+      mentalLoad,
+      avgScore: Math.round(avgScore * 100) / 100,
+      totalTime: Math.round(totalTime * 100) / 100,
+      dailyProgress,
+      neuralEfficiency,
+      weekScores,
+      streakDays
+    };
+  };
+
+  const metrics = calculateMetrics();
   
   const mentalLoadData = [
     { time: '6AM', load: 35 },
@@ -26,15 +137,27 @@ function DashboardContent() {
     { time: '10AM', load: 62 },
     { time: '12PM', load: 75 },
     { time: '2PM', load: 85 },
-    { time: '4PM', load: 89 },
+    { time: '4PM', load: Math.round(metrics.mentalLoad) },
     { time: '6PM', load: 78 },
     { time: '8PM', load: 62 }
   ];
 
+  // Calculate STX scores based on module types
+  const moduleSums: Record<string, number> = {};
+  const moduleCounts: Record<string, number> = {};
+  
+  sessions.forEach(s => {
+    moduleSums[s.moduleType] = (moduleSums[s.moduleType] || 0) + s.score;
+    moduleCounts[s.moduleType] = (moduleCounts[s.moduleType] || 0) + 1;
+  });
+
+  const getModuleAvg = (moduleType: string) => 
+    moduleCounts[moduleType] ? Math.round(moduleSums[moduleType] / moduleCounts[moduleType]) : 0;
+
   const steexScores = [
-    { label: 'S', value: 75 },
-    { label: 'T', value: 65 },
-    { label: 'X', value: 82 }
+    { label: 'S', value: getModuleAvg('sensory') || 75 },
+    { label: 'T', value: getModuleAvg('cmi') || 65 },
+    { label: 'X', value: getModuleAvg('pattern') || 82 }
   ];
 
   const containerVariants = {
@@ -296,20 +419,26 @@ function DashboardContent() {
             <Zap size={16} className="text-yellow-400" />
             <span className="text-[10px] md:text-xs text-gray-400 font-semibold uppercase tracking-wider">Active Session</span>
           </div>
-          <p className="text-2xl md:text-3xl font-bold text-white mb-1">42m 18s</p>
+          <p className="text-2xl md:text-3xl font-bold text-white mb-1">
+            {(() => {
+              const mins = Math.floor(metrics.totalTime * 60);
+              const secs = Math.floor((metrics.totalTime * 60 - mins) * 60);
+              return `${mins}m ${secs}s`;
+            })()}
+          </p>
           <div className="flex items-center gap-2">
             <div className="flex-1 h-1 bg-slate-700/50 rounded-full overflow-hidden">
               <motion.div
-                animate={{ width: ['0%', '68%'] }}
+                animate={{ width: ['0%', `${Math.min(metrics.avgScore, 100)}%`] }}
                 transition={{ duration: 2 }}
                 className="h-full bg-gradient-to-r from-yellow-500 to-orange-500"
               />
             </div>
-            <span className="text-xs text-gray-400">68%</span>
+            <span className="text-xs text-gray-400">{Math.min(metrics.avgScore, 100)}%</span>
           </div>
           <p className="text-xs text-yellow-400 mt-2 font-semibold flex items-center gap-1">
             <Flame size={12} />
-            6 day streak
+            {metrics.streakDays} day streak
           </p>
         </motion.div>
 
@@ -323,30 +452,30 @@ function DashboardContent() {
             <span className="text-[10px] md:text-xs text-gray-400 font-semibold uppercase tracking-wider">Cognitive Load</span>
           </div>
           <div className="flex items-baseline gap-2 mb-2">
-            <p className="text-2xl md:text-3xl font-bold text-white">{mentalLoad}%</p>
+            <p className="text-2xl md:text-3xl font-bold text-white">{Math.round(metrics.mentalLoad)}%</p>
             <motion.span 
               className="text-xs px-2 py-1 rounded-full font-bold"
               animate={{ 
-                backgroundColor: mentalLoad > 80 
+                backgroundColor: metrics.mentalLoad > 80 
                   ? 'rgba(239, 68, 68, 0.2)' 
-                  : mentalLoad > 60 
+                  : metrics.mentalLoad > 60 
                   ? 'rgba(245, 158, 11, 0.2)' 
                   : 'rgba(34, 197, 94, 0.2)'
               }}
             >
               <span className={`
-                ${mentalLoad > 80 ? 'text-red-400' : 
-                  mentalLoad > 60 ? 'text-yellow-400' : 
+                ${metrics.mentalLoad > 80 ? 'text-red-400' : 
+                  metrics.mentalLoad > 60 ? 'text-yellow-400' : 
                   'text-green-400'}
               `}>
-                {mentalLoad > 80 ? 'High' : mentalLoad > 60 ? 'Moderate' : 'Optimal'}
+                {metrics.mentalLoad > 80 ? 'High' : metrics.mentalLoad > 60 ? 'Moderate' : 'Optimal'}
               </span>
             </motion.span>
           </div>
           <div className="relative w-full h-2 bg-slate-800/50 rounded-full overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
-              animate={{ width: `${mentalLoad}%` }}
+              animate={{ width: `${metrics.mentalLoad}%` }}
               transition={{ duration: 1.5 }}
               className="h-full bg-gradient-to-r from-cyan-500 to-blue-500"
             />
@@ -362,12 +491,12 @@ function DashboardContent() {
             <TrendingUp size={16} className="text-green-400" />
             <span className="text-[10px] md:text-xs text-gray-400 uppercase tracking-widest">Daily Progress</span>
           </div>
-          <p className="text-xl md:text-2xl font-bold text-white">78%</p>
+          <p className="text-xl md:text-2xl font-bold text-white">{metrics.dailyProgress}%</p>
           <div className="w-full h-1.5 bg-slate-700/50 rounded-full mt-2 overflow-hidden">
             <motion.div 
               className="h-full bg-gradient-to-r from-green-400 to-teal-500 rounded-full"
               initial={{ width: 0 }}
-              animate={{ width: '78%' }}
+              animate={{ width: `${metrics.dailyProgress}%` }}
               transition={{ duration: 1 }}
             />
           </div>
@@ -382,8 +511,12 @@ function DashboardContent() {
             <Sparkles size={16} className="text-purple-400" />
             <span className="text-[10px] md:text-xs text-gray-400 uppercase tracking-widest">Neural Efficiency</span>
           </div>
-          <p className="text-xl md:text-2xl font-bold brain-gradient-text">92%</p>
-          <p className="text-xs text-gray-400 mt-1">Optimal brain performance</p>
+          <p className="text-xl md:text-2xl font-bold brain-gradient-text">{metrics.neuralEfficiency}%</p>
+          <p className="text-xs text-gray-400 mt-1">
+            {metrics.neuralEfficiency >= 90 ? 'Optimal brain performance' : 
+             metrics.neuralEfficiency >= 75 ? 'Above average performance' : 
+             'Room for improvement'}
+          </p>
         </motion.div>
       </div>
 
@@ -543,15 +676,17 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
 /* ================= APP ROOT ================= */
 export default function NeuralForge() {
   return (
-    <Router>
-      <MainLayout>
-        <Routes>
-          <Route path="/" element={<DashboardContent />} />
-          <Route path="/training-floor" element={<TrainingFloor />} />
-          <Route path="/progress" element={<Progress />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
-      </MainLayout>
-    </Router>
+    <UserProvider>
+      <Router>
+        <MainLayout>
+          <Routes>
+            <Route path="/" element={<DashboardContent />} />
+            <Route path="/training-floor" element={<TrainingFloor />} />
+            <Route path="/progress" element={<Progress />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </MainLayout>
+      </Router>
+    </UserProvider>
   );
 }

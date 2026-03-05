@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
 import { ScoringEngine } from '@/lib/scoringEngine';
+import { useUser } from '@/lib/userContext';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { GiUpgrade, GiMountaintop } from 'react-icons/gi';
 import { MdTrendingUp } from 'react-icons/md';
@@ -126,6 +127,8 @@ const difficultyConfig = {
 };
 
 export default function PatternMatchModule({ onComplete, onBack }: PatternMatchModuleProps) {
+  const { currentUser } = useUser();
+  const [gameStartTime, setGameStartTime] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState(0);
@@ -164,6 +167,7 @@ export default function PatternMatchModule({ onComplete, onBack }: PatternMatchM
   };
 
   const initializeGame = (selectedDifficulty: 'easy' | 'medium' | 'hard') => {
+    setGameStartTime(performance.now());
     setDifficulty(selectedDifficulty);
     const config = difficultyConfig[selectedDifficulty];
     setTimeLeft(config.timePerPuzzle);
@@ -319,14 +323,16 @@ export default function PatternMatchModule({ onComplete, onBack }: PatternMatchM
     const moduleScore = scoring.calculatePatternScore(accuracy, speed, difficulty);
 
     try {
-      const aggregator = new BrainMetricsAggregator();
+      const aggregator = new BrainMetricsAggregator(currentUser.id);
       aggregator.addSession({
         timestamp: new Date(),
         moduleType: 'pattern',
         score: moduleScore.normalizedScore,
-        duration: totalTime,
+        duration: performance.now() - gameStartTime,
         subscores: moduleScore.subscores,
       });
+      // Dispatch event to notify Progress component
+      window.dispatchEvent(new CustomEvent('sessions-updated', { detail: { userId: currentUser.id } }));
     } catch (e) {
       console.error('Failed to save session:', e);
     }

@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useUser } from "@/lib/userContext";
+import { BrainMetricsAggregator } from "@/lib/brainMetrics";
 import BrainShowpiece from "./interactive-brain/BrainShowpiece";
 import CreativityModule from "./modules/CreativityModule";
 import LeadershipModule from "./modules/LeadershipModule";
@@ -169,8 +171,27 @@ const abilityData: Record<
 /* ================= MAIN ================= */
 
 const TrainingFloor = () => {
+  const { currentUser } = useUser();
+  const aggregatorRef = useRef<BrainMetricsAggregator | null>(null);
   const [selectedAbility, setSelectedAbility] = useState<string | null>(null);
   const [trainingActive, setTrainingActive] = useState(false);
+  const [mentalLoad, setMentalLoad] = useState(75);
+
+  useEffect(() => {
+    // Initialize aggregator for current user
+    aggregatorRef.current = new BrainMetricsAggregator(currentUser.id);
+    
+    // Calculate mental load from average scores
+    const averages = aggregatorRef.current.getAverageScores();
+    const moduleScores = Object.values(averages).filter(s => s > 0);
+    
+    if (moduleScores.length > 0) {
+      const avgScore = moduleScores.reduce((a, b) => a + b, 0) / moduleScores.length;
+      // Mental load is inverse of performance
+      const load = Math.round((100 - avgScore) * 100) / 100;
+      setMentalLoad(Math.max(0, Math.min(100, load)));
+    }
+  }, [currentUser.id]);
 
   const handleTrainingComplete = (score: number, profile: any) => {
     console.log("Training complete!", { score, profile });
@@ -308,13 +329,13 @@ const TrainingFloor = () => {
                 Current Mental Load
               </p>
               <div className="w-full sm:w-32 h-10 sm:h-12 flex items-center justify-center border-b border-emerald-500/30">
-                <span className="text-2xl sm:text-3xl font-light">75%</span>
+                <span className="text-2xl sm:text-3xl font-light">{mentalLoad.toFixed(2)}%</span>
               </div>
             </div>
             {/* RIGHT */}
             <div className="min-w-0 w-full sm:w-auto text-left sm:text-right">
               <p className="text-[9px] sm:text-[10px] tracking-[0.15em] sm:tracking-[0.2em] text-emerald-400/80 font-bold uppercase mb-1">
-                Steex & Shantha
+                {currentUser.name}
               </p>
               <div className="space-y-1 w-full sm:w-32 md:w-40 sm:ml-auto">
                 <ProgressBar width="w-[70%]" color="bg-emerald-400" />

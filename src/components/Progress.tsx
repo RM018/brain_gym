@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
 import { BrainMetricsAggregator } from "@/lib/brainMetrics";
 import type { SessionData } from "@/lib/brainMetrics";
+import { useUser } from "@/lib/userContext";
 import {
   TrendingUp,
   Brain,
@@ -57,20 +58,26 @@ const Progress = () => {
 
   const [sessions, setSessions] = useState<SessionData[]>([]);
   const aggRef = useRef<BrainMetricsAggregator | null>(null);
+  const { currentUser } = useUser();
 
   useEffect(() => {
-  const agg = new BrainMetricsAggregator();
+  const agg = new BrainMetricsAggregator(currentUser.id);
   aggRef.current = agg;
   setSessions(agg.getSessions());
 
-  const handleSessionsUpdated = () => {
-    if (aggRef.current) {
-      setSessions(aggRef.current.getSessions());
+  const handleSessionsUpdated = (event: any) => {
+    // Only update if the event is for the current user
+    if (!event.detail || event.detail.userId === currentUser.id) {
+      if (aggRef.current) {
+        const updatedSessions = aggRef.current.getSessions();
+        setSessions(updatedSessions);
+      }
     }
   };
+  
   window.addEventListener('sessions-updated', handleSessionsUpdated);
   return () => window.removeEventListener('sessions-updated', handleSessionsUpdated);
-}, []);
+}, [currentUser.id]);
 
   const formatLabel = (d: Date, period: "day" | "week" | "month" | "year"): string => {
     if (period === "day") {
@@ -193,10 +200,10 @@ const Progress = () => {
     sessions.forEach((s) => counts[s.moduleType] = (counts[s.moduleType] || 0) + 1);
     const total = sessions.length || 1;
     return [
-      { name: "Memory", value: ((counts.memory || 0) / total) * 100, color: "from-teal-500 to-cyan-500" },
-      { name: "Logic", value: ((counts.cmi || 0) / total) * 100, color: "from-blue-500 to-cyan-500" },
-      { name: "Speed", value: ((counts.pattern || 0) / total) * 100, color: "from-amber-500 to-orange-500" },
-      { name: "Focus", value: ((counts.sensory || 0) / total) * 100, color: "from-green-500 to-emerald-500" },
+      { name: "Memory", value: Math.round(((counts.memory || 0) / total) * 100 * 100) / 100, color: "from-teal-500 to-cyan-500" },
+      { name: "Logic", value: Math.round(((counts.cmi || 0) / total) * 100 * 100) / 100, color: "from-blue-500 to-cyan-500" },
+      { name: "Speed", value: Math.round(((counts.pattern || 0) / total) * 100 * 100) / 100, color: "from-amber-500 to-orange-500" },
+      { name: "Focus", value: Math.round(((counts.sensory || 0) / total) * 100 * 100) / 100, color: "from-green-500 to-emerald-500" },
     ];
   }, [sessions]);
 
@@ -522,7 +529,7 @@ const Progress = () => {
                     <div className={`w-3 h-3 rounded bg-gradient-to-br ${type.color}`} />
                     <span className="text-sm text-gray-300">{type.name}</span>
                   </div>
-                  <span className="text-sm font-semibold text-white">{type.value}%</span>
+                  <span className="text-sm font-semibold text-white">{type.value.toFixed(2)}%</span>
                 </div>
               ))}
             </div>

@@ -5,13 +5,31 @@ import {
   Moon, Sun, Monitor, Trash2,
   Download, Upload, Check
 } from 'lucide-react';
+import { useUser } from '@/lib/userContext';
 
 const Settings = () => {
+  const { currentUser, users, switchUser, addUser } = useUser();
+  const [newUserName, setNewUserName] = useState('');
+  const [showNewUserInput, setShowNewUserInput] = useState(false);
   const [theme, setTheme] = useState('dark');
   const [notifications, setNotifications] = useState(true);
   const [soundEffects, setSoundEffects] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
   const [language] = useState('en');
+
+  const handleAddUser = () => {
+    if (newUserName.trim()) {
+      const newUser = {
+        id: `user-${Date.now()}`,
+        name: newUserName,
+        email: `${newUserName.toLowerCase()}@aaruchudar.com`
+      };
+      addUser(newUser);
+      switchUser(newUser.id);
+      setNewUserName('');
+      setShowNewUserInput(false);
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -116,7 +134,77 @@ const Settings = () => {
           <p className="text-gray-400">Customize your Neural Forge experience</p>
         </motion.div>
 
-        {/* Settings Sections */}
+        {/* User Management Section */}
+        <motion.div
+          variants={itemVariants}
+          className="bg-slate-800/40 backdrop-blur-md border border-teal-500/30 rounded-2xl p-6 shadow-xl shadow-teal-500/5 hover:shadow-teal-500/15 transition-all duration-300"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-lg bg-teal-500/20 border border-teal-400/30 flex items-center justify-center">
+              <User size={20} className="text-teal-300" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-100">User Management</h2>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-300 block mb-2">Current User</label>
+              <select
+                value={currentUser.id}
+                onChange={(e) => switchUser(e.target.value)}
+                className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2 text-gray-200 focus:outline-none focus:border-teal-400 transition-colors"
+              >
+                {users.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.name} ({user.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {showNewUserInput ? (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newUserName}
+                  onChange={(e) => setNewUserName(e.target.value)}
+                  placeholder="Enter new user name"
+                  className="flex-1 bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2 text-gray-200 focus:outline-none focus:border-teal-400 transition-colors"
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddUser()}
+                />
+                <motion.button
+                  onClick={handleAddUser}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-4 py-2 rounded-lg bg-teal-500/30 border border-teal-400 text-teal-300 hover:bg-teal-500/40 transition-colors flex items-center gap-2"
+                >
+                  <Check size={18} />
+                  Add
+                </motion.button>
+                <motion.button
+                  onClick={() => {
+                    setShowNewUserInput(false);
+                    setNewUserName('');
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-4 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-gray-300 hover:text-gray-100 transition-colors"
+                >
+                  Cancel
+                </motion.button>
+              </div>
+            ) : (
+              <motion.button
+                onClick={() => setShowNewUserInput(true)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full py-2 rounded-lg bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 hover:bg-emerald-500/30 transition-colors"
+              >
+                + Add New User
+              </motion.button>
+            )}
+          </div>
+        </motion.div>
         {sections.map((section) => {
           const Icon = section.icon;
           return (

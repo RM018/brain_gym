@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ScoringEngine } from '@/lib/scoringEngine';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
+import { useUser } from '@/lib/userContext';
 
 export interface VoiceValueModuleProps {
   onComplete: (score: number, profile: any) => void;
@@ -193,6 +194,8 @@ const scenarios: Scenario[] = [
 ];
 
 export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModuleProps) {
+  const { currentUser } = useUser();
+  const [gameStartTime, setGameStartTime] = useState(0);
   const [gamePhase, setGamePhase] = useState<'values' | 'scenarios' | 'results'>('values');
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0);
@@ -200,13 +203,11 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
   const [valueScores, setValueScores] = useState<{ [key: string]: number }>({});
   const [timeRemaining, setTimeRemaining] = useState(10);
   const [timerActive, setTimerActive] = useState(false);
-  const [totalTime, setTotalTime] = useState(0);
 
   useEffect(() => {
     if (!timerActive || timeRemaining <= 0) return;
     const timer = setInterval(() => {
       setTimeRemaining(t => t - 1);
-      setTotalTime(prev => prev + 1);
     }, 1000);
     return () => clearInterval(timer);
   }, [timerActive, timeRemaining]);
@@ -226,6 +227,7 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
 
   const startScenarios = () => {
     if (selectedValues.length === 0) return;
+    setGameStartTime(performance.now());
     setGamePhase('scenarios');
     setTimerActive(true);
   };
@@ -272,14 +274,16 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
     const moduleScore = scoring.calculateVoiceValueScore(totalRawScore, consistency, alignment);
 
     try {
-      const aggregator = new BrainMetricsAggregator();
+      const aggregator = new BrainMetricsAggregator(currentUser.id);
       aggregator.addSession({
         timestamp: new Date(),
         moduleType: 'voicevalue',
         score: moduleScore.normalizedScore,
-        duration: totalTime,
+        duration: performance.now() - gameStartTime,
         subscores: moduleScore.subscores,
       });
+      // Dispatch event to notify Progress component
+      window.dispatchEvent(new CustomEvent('sessions-updated', { detail: { userId: currentUser.id } }));
     } catch (e) {
       console.error('Failed to save session:', e);
     }

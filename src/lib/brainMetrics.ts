@@ -32,9 +32,10 @@ export interface StressToleranceProfile {
 
 export class BrainMetricsAggregator {
   private sessions: SessionData[] = [];
-  private storageKey = "brain_gym_metrics";
+  private storageKey: string;
 
-  constructor() {
+  constructor(userId: string = 'default-user') {
+    this.storageKey = `brain_gym_metrics_${userId}`;
     this.loadFromStorage();
   }
 
@@ -54,7 +55,7 @@ export class BrainMetricsAggregator {
     return this.sessions.filter((s) => s.moduleType === moduleType);
   }
 
-  // Calculate average scores per module
+  // Calculate average scores per module (rounded to 2 decimal places)
   getAverageScores(): Record<string, number> {
     const modules = [
       "cmi",
@@ -71,7 +72,7 @@ export class BrainMetricsAggregator {
       const moduleSessions = this.getSessionsByModule(module);
       if (moduleSessions.length > 0) {
         const sum = moduleSessions.reduce((acc, s) => acc + s.score, 0);
-        averages[module] = sum / moduleSessions.length;
+        averages[module] = Math.round((sum / moduleSessions.length) * 100) / 100;
       } else {
         averages[module] = 0;
       }
@@ -89,7 +90,7 @@ export class BrainMetricsAggregator {
     }));
   }
 
-  // Calculate improvement rate
+  // Calculate improvement rate (rounded to 2 decimal places)
   getImprovementRate(): number {
     if (this.sessions.length < 2) return 0;
 
@@ -98,10 +99,10 @@ export class BrainMetricsAggregator {
 
     const improvement =
       ((lastSession.score - firstSession.score) / firstSession.score) * 100;
-    return improvement;
+    return Math.round(improvement * 100) / 100;
   }
 
-  // Get stress tolerance profile
+  // Get stress tolerance profile (rounded to 2 decimal places)
   getStressToleranceProfile(): StressToleranceProfile {
     const normalSessions = this.sessions.filter(
       (s) => s.moduleType !== "sensory" && s.score > 0,
@@ -110,19 +111,19 @@ export class BrainMetricsAggregator {
 
     const baselinePerformance =
       normalSessions.length > 0
-        ? normalSessions.reduce((sum, s) => sum + s.score, 0) /
-          normalSessions.length
+        ? Math.round((normalSessions.reduce((sum, s) => sum + s.score, 0) /
+          normalSessions.length) * 100) / 100
         : 0;
 
     const performanceUnderStress =
       stressSessions.length > 0
-        ? stressSessions.reduce((sum, s) => sum + s.score, 0) /
-          stressSessions.length
+        ? Math.round((stressSessions.reduce((sum, s) => sum + s.score, 0) /
+          stressSessions.length) * 100) / 100
         : 0;
 
     const stressResilience =
       baselinePerformance > 0
-        ? (performanceUnderStress / baselinePerformance) * 100
+        ? Math.round((performanceUnderStress / baselinePerformance) * 10000) / 100
         : 0;
 
     // Calculate recovery rate (improvement over stress sessions)
@@ -130,7 +131,7 @@ export class BrainMetricsAggregator {
     if (stressSessions.length > 1) {
       const firstStress = stressSessions[0].score;
       const lastStress = stressSessions[stressSessions.length - 1].score;
-      recoveryRate = ((lastStress - firstStress) / firstStress) * 100;
+      recoveryRate = Math.round(((lastStress - firstStress) / firstStress) * 10000) / 100;
     }
 
     return {

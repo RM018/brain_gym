@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
 import { ScoringEngine } from '@/lib/scoringEngine';
+import { useUser } from '@/lib/userContext';
 import { FaStar, FaBullseye, FaRocket, FaPalette, FaLightbulb, FaMask, FaGuitar, FaDice, FaTrophy, FaBolt } from 'react-icons/fa';
 import { GiBrain } from 'react-icons/gi';
 import { MdAutoAwesome, MdMusicNote } from 'react-icons/md';
@@ -38,6 +39,8 @@ const symbolIcons: Record<string, React.ComponentType<any>> = {
 const symbolIds = ['star', 'target', 'rocket', 'palette', 'brain', 'lightbulb', 'mask', 'guitar', 'dice', 'trophy', 'bolt', 'music'];
 
 export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) {
+  const { currentUser } = useUser();
+  const [gameStartTime, setGameStartTime] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [cards, setCards] = useState<Card[]>([]);
@@ -77,6 +80,7 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
   }, [matched, difficulty]);
 
   const initializeGame = (selectedDifficulty: 'easy' | 'medium' | 'hard') => {
+    setGameStartTime(performance.now());
     setDifficulty(selectedDifficulty);
     const config = difficultyConfig[selectedDifficulty];
     const selectedSymbolIds = symbolIds.slice(0, config.pairs);
@@ -197,14 +201,16 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
     );
 
     try {
-      const aggregator = new BrainMetricsAggregator();
+      const aggregator = new BrainMetricsAggregator(currentUser.id);
       aggregator.addSession({
         timestamp: new Date(),
         moduleType: 'memory',
         score: moduleScore.normalizedScore,
-        duration: time,
+        duration: performance.now() - gameStartTime,
         subscores: moduleScore.subscores,
       });
+      // Dispatch event to notify Progress component
+      window.dispatchEvent(new CustomEvent('sessions-updated', { detail: { userId: currentUser.id } }));
     } catch (e) {
       console.error('Failed to save session:', e);
     }

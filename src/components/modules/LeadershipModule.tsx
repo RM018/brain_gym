@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScoringEngine } from '@/lib/scoringEngine';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
+import { useUser } from '@/lib/userContext';
 
 export interface LeadershipModuleProps {
   onComplete: (score: number, decisions: DecisionData[]) => void;
@@ -319,6 +320,7 @@ const scenarios: Scenario[] = [
 ];
 
 export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }: LeadershipModuleProps) {
+  const { currentUser } = useUser();
   const [gameStarted, setGameStarted] = useState(false);
   const [currentScenario, setCurrentScenario] = useState(0);
   const [leadershipScore, setLeadershipScore] = useState(50);
@@ -329,6 +331,7 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
   const [trustScore, setTrustScore] = useState(50);
   const [decisions, setDecisions] = useState<DecisionData[]>([]);
   const [decisionStartTime, setDecisionStartTime] = useState(0);
+  const [gameStartTime, setGameStartTime] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [lastImpact, setLastImpact] = useState<string>('');
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
@@ -353,8 +356,10 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
   }, [timeLeft, gameStarted]);
 
   const startGame = () => {
+    const now = performance.now();
     setGameStarted(true);
-    setDecisionStartTime(performance.now());
+    setGameStartTime(now);
+    setDecisionStartTime(now);
     if (scenarios[0].timePressure) {
       setTimeLeft(30);
     }
@@ -432,14 +437,16 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
         );
 
         try {
-          const aggregator = new BrainMetricsAggregator();
+          const aggregator = new BrainMetricsAggregator(currentUser.id);
           aggregator.addSession({
             timestamp: new Date(),
             moduleType: 'leadership',
             score: moduleScore.normalizedScore,
-            duration: performance.now() - decisionStartTime,
+            duration: performance.now() - gameStartTime,
             subscores: moduleScore.subscores,
           });
+          // Dispatch event to notify Progress component
+          window.dispatchEvent(new CustomEvent('sessions-updated', { detail: { userId: currentUser.id } }));
         } catch (e) {
           console.error('Failed to save session:', e);
         }

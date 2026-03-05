@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScoringEngine } from '@/lib/scoringEngine';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
+import { useUser } from '@/lib/userContext';
 
 export interface SensoryModuleProps {
   onComplete: (score: number, profile: any) => void;
@@ -30,6 +31,8 @@ interface GameStats {
 }
 
 export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps) {
+  const { currentUser } = useUser();
+  const [gameStartTime, setGameStartTime] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [phase, setPhase] = useState<'baseline' | 'loaded'>('baseline');
   const [score, setScore] = useState(0);
@@ -77,6 +80,7 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
   };
 
   const startGame = () => {
+    setGameStartTime(performance.now());
     setGameStarted(true);
     startPhase('baseline');
   };
@@ -237,14 +241,16 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
       );
 
       try {
-        const aggregator = new BrainMetricsAggregator();
+        const aggregator = new BrainMetricsAggregator(currentUser.id);
         aggregator.addSession({
           timestamp: new Date(),
           moduleType: 'sensory',
           score: moduleScore.normalizedScore,
-          duration: 60000,
+          duration: performance.now() - gameStartTime,
           subscores: moduleScore.subscores,
         });
+        // Dispatch event to notify Progress component
+        window.dispatchEvent(new CustomEvent('sessions-updated', { detail: { userId: currentUser.id } }));
       } catch (e) {
         console.error('Failed to save session:', e);
       }

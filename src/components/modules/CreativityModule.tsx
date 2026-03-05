@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { DATEngine } from '@/lib/semanticDistance';
 import { ScoringEngine } from '@/lib/scoringEngine';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
+import { useUser } from '@/lib/userContext';
 
 export interface CreativityModuleProps {
   onComplete: (score: number, profile: any) => void;
@@ -12,6 +13,8 @@ export interface CreativityModuleProps {
 }
 
 export default function CreativityModule({ onComplete, onBack }: CreativityModuleProps) {
+  const { currentUser } = useUser();
+  const [gameStartTime, setGameStartTime] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [words, setWords] = useState<string[]>(Array(10).fill(''));
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -20,6 +23,7 @@ export default function CreativityModule({ onComplete, onBack }: CreativityModul
   const [results, setResults] = useState<any>(null);
 
   const startGame = () => {
+    setGameStartTime(performance.now());
     setGameStarted(true);
   };
 
@@ -59,14 +63,16 @@ export default function CreativityModule({ onComplete, onBack }: CreativityModul
       );
 
       try {
-        const aggregator = new BrainMetricsAggregator();
+        const aggregator = new BrainMetricsAggregator(currentUser.id);
         aggregator.addSession({
           timestamp: new Date(),
           moduleType: 'creativity',
           score: moduleScore.normalizedScore,
-          duration: 0,
+          duration: performance.now() - gameStartTime,
           subscores: moduleScore.subscores,
         });
+        // Dispatch event to notify Progress component
+        window.dispatchEvent(new CustomEvent('sessions-updated', { detail: { userId: currentUser.id } }));
       } catch (e) {
         console.error('Failed to save session:', e);
       }

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScoringEngine } from '@/lib/scoringEngine';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
+import { useUser } from '@/lib/userContext';
 
 export interface ConflictModuleProps {
   onComplete: (score: number, metrics: any) => void;
@@ -130,6 +131,8 @@ const scenarios: ConflictScenario[] = [
 ];
 
 export default function ConflictModule({ onComplete, onBack }: ConflictModuleProps) {
+  const { currentUser } = useUser();
+  const [gameStartTime, setGameStartTime] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [currentScenario, setCurrentScenario] = useState(0);
   const [metrics, setMetrics] = useState<ConflictMetrics>({
@@ -145,8 +148,10 @@ export default function ConflictModule({ onComplete, onBack }: ConflictModulePro
   const [finalResults, setFinalResults] = useState<any>(null);
 
   const startGame = () => {
+    const now = performance.now();
+    setGameStartTime(now);
     setGameStarted(true);
-    setResponseStartTime(performance.now());
+    setResponseStartTime(now);
   };
 
   const selectResponse = (responseIndex: number) => {
@@ -189,14 +194,16 @@ export default function ConflictModule({ onComplete, onBack }: ConflictModulePro
         );
 
         try {
-          const aggregator = new BrainMetricsAggregator();
+          const aggregator = new BrainMetricsAggregator(currentUser.id);
           aggregator.addSession({
             timestamp: new Date(),
             moduleType: 'conflict',
             score: moduleScore.normalizedScore,
-            duration: performance.now() - (responseStartTime - (responseTime * scenarios.length)),
+            duration: performance.now() - gameStartTime,
             subscores: moduleScore.subscores,
           });
+          // Dispatch event to notify Progress component
+          window.dispatchEvent(new CustomEvent('sessions-updated', { detail: { userId: currentUser.id } }));
         } catch (e) {
           console.error('Failed to save session:', e);
         }
