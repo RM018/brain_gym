@@ -320,54 +320,54 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
 
   if (gamePhase === 'values') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-slate-900/95 to-indigo-900/40 p-4">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-slate-900/95 to-indigo-900/40 p-4 overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#0a1a2e]/80 border border-violet-500/40 backdrop-blur-xl rounded-3xl p-8 md:p-12 max-w-4xl w-full"
+          className="bg-[#0a1a2e]/80 border border-violet-500/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-6 md:p-8 lg:p-12 max-w-4xl w-full my-auto"
         >
-          <h1 className="text-4xl md:text-5xl font-bold mb-3 text-center">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-2 sm:mb-3 text-center">
             <span className="text-violet-400">VOICE</span>
             <span className="text-pink-400"> & </span>
             <span className="text-cyan-400">VALUE</span>
           </h1>
-          <p className="text-lg text-gray-300 mb-3 text-center">
-            Discover what truly matters to you
+          <p className="text-sm sm:text-base md:text-lg text-gray-300 mb-2 sm:mb-3 text-center">
+            Discover what truly matters
           </p>
-          <p className="text-sm text-gray-400 mb-8 text-center">
-            Choose 3 core values that guide your decisions and voice
+          <p className="text-xs sm:text-sm text-gray-400 mb-6 sm:mb-8 text-center">
+            Choose 3 core values
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8">
             {coreValues.map((value) => (
               <motion.button
                 key={value.id}
                 onClick={() => handleValueToggle(value.id)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={`p-4 rounded-xl border-2 transition-all ${
+                className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 transition-all ${
                   selectedValues.includes(value.id)
                     ? 'bg-violet-500/20 border-violet-400 text-violet-100 shadow-lg shadow-violet-500/50'
                     : 'bg-slate-800/40 border-slate-600/40 text-gray-400 hover:border-violet-400/50'
                 }`}
               >
-                <div className="text-3xl mb-2">{value.icon}</div>
-                <div className="font-bold text-lg">{value.name}</div>
-                <div className="text-xs text-gray-400 mt-1">{value.description}</div>
+                <div className="text-xl sm:text-2xl md:text-3xl mb-2">{value.icon}</div>
+                <div className="font-bold text-sm sm:text-base md:text-lg">{value.name}</div>
+                <div className="text-xs text-gray-400 mt-1 line-clamp-2 leading-tight">{value.description}</div>
                 {selectedValues.includes(value.id) && (
-                  <div className="text-violet-300 text-xl mt-2">✓</div>
+                  <div className="text-violet-300 text-lg sm:text-xl mt-2">✓</div>
                 )}
               </motion.button>
             ))}
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
             {onBack && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onBack}
-                className="flex-1 py-3 px-6 bg-slate-700/50 hover:bg-slate-600/50 text-gray-300 rounded-lg font-semibold transition-all"
+                className="flex-1 py-2 sm:py-3 px-4 sm:px-6 text-xs sm:text-sm bg-slate-700/50 hover:bg-slate-600/50 text-gray-300 rounded-lg font-semibold transition-all"
               >
                 Back
               </motion.button>
@@ -377,13 +377,13 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
               whileTap={{ scale: 0.95 }}
               onClick={startScenarios}
               disabled={selectedValues.length === 0}
-              className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
+              className={`flex-1 py-2 sm:py-3 px-4 sm:px-6 rounded-lg font-semibold text-xs sm:text-sm transition-all ${
                 selectedValues.length === 0
                   ? 'bg-gray-600/30 text-gray-500 cursor-not-allowed'
                   : 'bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-500 hover:to-pink-500 text-white'
               }`}
             >
-              Start Scenarios ({selectedValues.length}/3)
+              Start ({selectedValues.length}/3)
             </motion.button>
           </div>
         </motion.div>
@@ -397,25 +397,25 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-3xl"
+          className="w-full max-w-3xl px-0"
         >
           {/* Progress bar */}
-          <div className="mb-6 bg-slate-800/40 rounded-full h-2">
+          <div className="mb-4 sm:mb-6 bg-slate-800/40 rounded-full h-2">
             <motion.div
               className="h-full bg-gradient-to-r from-violet-500 to-pink-500 rounded-full"
               animate={{ width: `${((currentScenarioIndex + 1) / scenarios.length) * 100}%` }}
             />
           </div>
 
-          <div className="bg-[#0a1a2e]/80 border border-violet-500/40 backdrop-blur-xl rounded-3xl p-8">
-            <div className="flex justify-between items-center mb-6">
-              <span className="text-violet-400 font-bold">
+          <div className="bg-[#0a1a2e]/80 border border-violet-500/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+              <span className="text-violet-400 font-bold text-sm sm:text-base">
                 Scenario {currentScenarioIndex + 1}/{scenarios.length}
               </span>
               {currentScenario?.timePressure && (
                 <motion.div
                   animate={{ scale: timeRemaining < 3 ? [1, 1.1, 1] : 1 }}
-                  className={`px-3 py-1 rounded-full font-bold ${
+                  className={`px-3 py-1 rounded-full font-bold text-sm ${
                     timeRemaining < 3
                       ? 'bg-red-500/30 text-red-300'
                       : 'bg-blue-500/30 text-blue-300'
@@ -426,34 +426,34 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
               )}
             </div>
 
-            <h2 className="text-2xl md:text-3xl font-bold mb-3 text-white">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 text-white leading-tight">
               {currentScenario?.title}
             </h2>
-            <div className="inline-block px-3 py-1 bg-violet-500/20 border border-violet-400/50 rounded-full text-violet-300 text-sm mb-4">
+            <div className="inline-block px-3 py-1 bg-violet-500/20 border border-violet-400/50 rounded-full text-violet-300 text-xs sm:text-sm mb-3 sm:mb-4">
               {currentScenario?.context}
             </div>
-            <p className="text-gray-300 mb-6 leading-relaxed">
+            <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-6 leading-relaxed">
               {currentScenario?.description}
             </p>
 
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {currentScenario?.options.map((option, idx) => (
                 <motion.button
                   key={idx}
                   onClick={() => handleOptionSelect(idx)}
                   whileHover={{ scale: 1.02, x: 5 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full p-4 text-left bg-slate-800/50 hover:bg-slate-700/60 border border-slate-600/50 hover:border-violet-400/50 rounded-xl transition-all group"
+                  className="w-full p-3 sm:p-4 text-left bg-slate-800/50 hover:bg-slate-700/60 border border-slate-600/50 hover:border-violet-400/50 rounded-lg sm:rounded-xl transition-all group"
                 >
-                  <div className="flex gap-3">
-                    <div className="text-2xl flex-shrink-0">
+                  <div className="flex gap-2 sm:gap-3">
+                    <div className="text-xl sm:text-2xl flex-shrink-0">
                       {idx === 0 ? '🎯' : idx === 1 ? '⚡' : '🌟'}
                     </div>
-                    <div>
-                      <p className="text-gray-100 group-hover:text-white font-medium">
+                    <div className="min-w-0">
+                      <p className="text-gray-100 group-hover:text-white font-medium text-sm sm:text-base">
                         {option.text}
                       </p>
-                      <p className="text-sm text-gray-500 mt-1">{option.impact}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mt-1">{option.impact}</p>
                     </div>
                   </div>
                 </motion.button>
@@ -479,44 +479,44 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-[#0a1a2e]/80 border border-violet-500/40 backdrop-blur-xl rounded-3xl p-8 md:p-12 max-w-2xl w-full text-center"
+          className="bg-[#0a1a2e]/80 border border-violet-500/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 lg:p-12 max-w-2xl w-full text-center"
         >
           <motion.div
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 0.6 }}
-            className="text-6xl mb-4"
+            className="text-5xl sm:text-6xl mb-3 sm:mb-4"
           >
             🎉
           </motion.div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-pink-400 to-cyan-400">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-pink-400 to-cyan-400">
             Voice Discovered!
           </h1>
-          <p className="text-gray-400 mb-8">
+          <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8">
             You've navigated through challenging values decisions
           </p>
 
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl p-4">
-              <div className="text-3xl font-bold text-violet-400">{moduleScore.normalizedScore}</div>
-              <div className="text-sm text-gray-400 mt-1">Overall Score</div>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="bg-violet-500/10 border border-violet-500/30 rounded-lg sm:rounded-xl p-3 sm:p-4">
+              <div className="text-2xl sm:text-3xl font-bold text-violet-400">{moduleScore.normalizedScore}</div>
+              <div className="text-xs sm:text-sm text-gray-400 mt-1">Overall Score</div>
             </div>
-            <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4">
-              <div className="text-3xl font-bold text-cyan-400">{consistency}</div>
-              <div className="text-sm text-gray-400 mt-1">Consistency</div>
+            <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg sm:rounded-xl p-3 sm:p-4">
+              <div className="text-2xl sm:text-3xl font-bold text-cyan-400">{consistency}</div>
+              <div className="text-xs sm:text-sm text-gray-400 mt-1">Consistency</div>
             </div>
           </div>
 
-          <div className="bg-slate-800/40 rounded-xl p-6 mb-8 text-left">
-            <h3 className="font-bold text-pink-400 mb-3">Your Core Values:</h3>
+          <div className="bg-slate-800/40 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-6 sm:mb-8 text-left">
+            <h3 className="font-bold text-pink-400 mb-2 sm:mb-3 text-sm sm:text-base">Your Core Values:</h3>
             <div className="flex gap-2 flex-wrap">
               {selectedValues.map(valueId => {
                 const value = coreValues.find(v => v.id === valueId);
                 return (
                   <div
                     key={valueId}
-                    className="bg-gradient-to-r from-violet-600/30 to-pink-600/30 border border-violet-400/50 px-4 py-2 rounded-full"
+                    className="bg-gradient-to-r from-violet-600/30 to-pink-600/30 border border-violet-400/50 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm"
                   >
-                    <span className="text-lg mr-2">{value?.icon}</span>
+                    <span className="text-base sm:text-lg mr-1.5">{value?.icon}</span>
                     <span className="text-gray-100">{value?.name}</span>
                   </div>
                 );
@@ -528,7 +528,7 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-sm text-gray-400 italic"
+            className="text-xs sm:text-sm text-gray-400 italic"
           >
             Use your voice with confidence. Your values guide you.
           </motion.div>

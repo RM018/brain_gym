@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion';
 import { User, TrendingUp, Brain, Zap, Bell, BellOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -111,9 +111,9 @@ const Header = () => {
                     transition={{ duration: 2, repeat: Infinity }}
                   >
                     {focusMode ? (
-                      <BellOff size={16} className="lg:w-5 lg:h-5 text-gray-400" title="Notifications muted" />
+                      <BellOff size={16} className="lg:w-5 lg:h-5 text-gray-400" />
                     ) : (
-                      <Bell size={16} className="lg:w-5 lg:h-5 text-teal-400" title="Notifications enabled" />
+                      <Bell size={16} className="lg:w-5 lg:h-5 text-teal-400" />
                     )}
                   </motion.div>
                 </div>

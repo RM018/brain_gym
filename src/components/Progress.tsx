@@ -458,7 +458,7 @@ const Progress = () => {
                       </motion.div>
                       <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
                         <span className={`text-sm font-bold whitespace-nowrap ${isHighlighted ? "text-teal-400" : "text-gray-400"}`}>
-                          {data.score > 0 ? data.score : "-"}
+                          {data.score > 0 ? data.score.toFixed(2) : "-"}
                         </span>
                       </div>
                     </div>

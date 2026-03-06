@@ -484,15 +484,15 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
             <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-blue-400 text-center">
               Your Leadership Attributes:
             </h3>
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 max-w-3xl mx-auto">
-              <div className="bg-slate-800/60 border border-slate-700 p-4 sm:p-6 rounded-xl">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
-                    <span className="text-xl sm:text-2xl">👑</span>
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 max-w-3xl mx-auto">
+              <div className="bg-slate-800/60 border border-slate-700 p-3 sm:p-6 rounded-xl">
+                <div className="flex items-center gap-2 sm:gap-3 mb-3">
+                  <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-lg sm:text-2xl">👑</span>
                   </div>
-                  <div>
-                    <div className="font-bold text-base sm:text-lg">Leadership</div>
-                    <div className="text-xs sm:text-sm text-gray-400">Your ability to lead</div>
+                  <div className="min-w-0">
+                    <div className="font-bold text-sm sm:text-lg">Leadership</div>
+                    <div className="text-xs sm:text-sm text-gray-400 truncate">Your ability</div>
                   </div>
                 </div>
                 <div className="w-full bg-slate-900 rounded-full h-2 sm:h-3">
@@ -500,14 +500,14 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
                 </div>
               </div>
 
-              <div className="bg-slate-800/60 border border-slate-700 p-4 sm:p-6 rounded-xl">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <span className="text-xl sm:text-2xl">⚖️</span>
+              <div className="bg-slate-800/60 border border-slate-700 p-3 sm:p-6 rounded-xl">
+                <div className="flex items-center gap-2 sm:gap-3 mb-3">
+                  <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-lg sm:text-2xl">🛡️</span>
                   </div>
-                  <div>
-                    <div className="font-bold text-base sm:text-lg">Integrity</div>
-                    <div className="text-xs sm:text-sm text-gray-400">Ethical standards</div>
+                  <div className="min-w-0">
+                    <div className="font-bold text-sm sm:text-lg">Integrity</div>
+                    <div className="text-xs sm:text-sm text-gray-400 truncate">Ethical foundation</div>
                   </div>
                 </div>
                 <div className="w-full bg-slate-900 rounded-full h-2 sm:h-3">
@@ -515,14 +515,14 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
                 </div>
               </div>
 
-              <div className="bg-slate-800/60 border border-slate-700 p-4 sm:p-6 rounded-xl">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-purple-500/20 flex items-center justify-center">
-                    <span className="text-xl sm:text-2xl">🎯</span>
+              <div className="bg-slate-800/60 border border-slate-700 p-3 sm:p-6 rounded-xl">
+                <div className="flex items-center gap-2 sm:gap-3 mb-3">
+                  <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-lg sm:text-2xl">⚡</span>
                   </div>
-                  <div>
-                    <div className="font-bold text-base sm:text-lg">Effectiveness</div>
-                    <div className="text-xs sm:text-sm text-gray-400">Results delivery</div>
+                  <div className="min-w-0">
+                    <div className="font-bold text-sm sm:text-lg">Effectiveness</div>
+                    <div className="text-xs sm:text-sm text-gray-400 truncate">Results achieved</div>
                   </div>
                 </div>
                 <div className="w-full bg-slate-900 rounded-full h-2 sm:h-3">
@@ -530,14 +530,14 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
                 </div>
               </div>
 
-              <div className="bg-slate-800/60 border border-slate-700 p-4 sm:p-6 rounded-xl">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                    <span className="text-xl sm:text-2xl">💪</span>
+              <div className="bg-slate-800/60 border border-slate-700 p-3 sm:p-6 rounded-xl">
+                <div className="flex items-center gap-2 sm:gap-3 mb-3">
+                  <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-lg sm:text-2xl">💪</span>
                   </div>
-                  <div>
-                    <div className="font-bold text-base sm:text-lg">Confidence</div>
-                    <div className="text-xs sm:text-sm text-gray-400">Self-assurance</div>
+                  <div className="min-w-0">
+                    <div className="font-bold text-sm sm:text-lg">Confidence</div>
+                    <div className="text-xs sm:text-sm text-gray-400 truncate">Self-belief</div>
                   </div>
                 </div>
                 <div className="w-full bg-slate-900 rounded-full h-2 sm:h-3">
@@ -769,18 +769,18 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
                 className="bg-slate-900/80 border border-purple-500/40 rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 mb-3 sm:mb-4 backdrop-blur-lg"
               >
                 <div className="mb-3 sm:mb-4">
-                  <h2 className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
+                  <h2 className="text-base sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2 leading-tight">
                     {scenario.title}
                   </h2>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`px-2 py-1 rounded-full text-xs ${scenario.timePressure ? 'bg-red-500/20 text-red-400' : 'bg-blue-500/20 text-blue-400'}`}>
-                      {scenario.timePressure ? '⏰ TIME PRESSURE' : '🧠 STRATEGIC'}
+                      {scenario.timePressure ? '⏰ TIME' : '🧠 STRATEGIC'}
                     </span>
-                    <span className="text-xs text-gray-400">Difficulty: {difficulty}/10</span>
+                    <span className="text-xs text-gray-400">Lvl {difficulty}/10</span>
                   </div>
                 </div>
 
-                <p className="text-sm sm:text-base md:text-lg text-gray-300 mb-4 sm:mb-5 leading-relaxed">
+                <p className="text-xs sm:text-base md:text-lg text-gray-300 mb-4 sm:mb-5 leading-relaxed">
                   {scenario.description}
                 </p>
 
