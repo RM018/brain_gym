@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { motion } from 'framer-motion';
 import { User, TrendingUp, Brain, Zap, Bell, BellOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import AuthInterface from './AuthInterface';
 
 const Header = () => {
     const navigate = useNavigate();
+    const [showAuth, setShowAuth] = useState(false);
     const [focusMode, setFocusModeState] = useState(() => {
       const saved = localStorage.getItem('focusMode');
       return saved ? JSON.parse(saved) : true;
@@ -96,6 +98,7 @@ const Header = () => {
 
                 {/* User Profile */}
                 <motion.button
+                  onClick={() => setShowAuth(true)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="p-2 lg:p-3 glass-card rounded-xl hover:border-teal-400/50 transition-all duration-200 group"
@@ -158,9 +161,9 @@ const Header = () => {
                   </motion.button>
                 </div>
               </motion.div>
-            </header>    
+</header>    
     
-    
+    {showAuth && <AuthInterface onClose={() => setShowAuth(false)} />}
     
     
     </>
