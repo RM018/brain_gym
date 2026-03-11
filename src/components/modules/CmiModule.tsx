@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { Brain, Gamepad2, Rocket } from 'lucide-react';
 import { PerformanceMonitor } from '@/lib/gameLoop';
 import { ScoringEngine } from '@/lib/scoringEngine';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
@@ -47,6 +48,7 @@ interface GameSequence {
 export default function CmiModule({ onComplete, onBack }: CmiModuleProps) {
   const { currentUser } = useUser();
   const [gameStartTime, setGameStartTime] = useState(0);
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard' | null>(null);
   const [gameState, setGameState] = useState<NeuroForgeGameState>({
     currentLevel: 1,
     score: 0,
@@ -57,6 +59,12 @@ export default function CmiModule({ onComplete, onBack }: CmiModuleProps) {
     timeLeft: 30,
     feedback: { message: '', type: '' },
   });
+
+  const difficultyConfig = {
+    easy: { initialLives: 5, maxLevels: 5 },
+    medium: { initialLives: 3, maxLevels: 8 },
+    hard: { initialLives: 2, maxLevels: 12 },
+  };
 
   const [grid, setGrid] = useState<number[][]>([
     [0, 0, 0],
@@ -103,7 +111,9 @@ export default function CmiModule({ onComplete, onBack }: CmiModuleProps) {
     if (gameState.currentLevel === 1) {
       setGameStartTime(performance.now());
     }
-    const newSequence = generateSequence(gameState.currentLevel);
+    const levelMultiplier = difficulty ? ({ easy: 0.8, medium: 1, hard: 1.3 }[difficulty]) : 1;
+    const adjustedLevel = Math.ceil(gameState.currentLevel * levelMultiplier);
+    const newSequence = generateSequence(adjustedLevel);
     setGameState((prev) => ({
       ...prev,
       sequence: newSequence,
@@ -271,11 +281,13 @@ export default function CmiModule({ onComplete, onBack }: CmiModuleProps) {
     );
   };
 
-  const startGameHandler = () => {
+  const startGameHandler = (selectedDifficulty: 'easy' | 'medium' | 'hard') => {
+    setDifficulty(selectedDifficulty);
+    const config = difficultyConfig[selectedDifficulty];
     setGameState({
       currentLevel: 1,
       score: 0,
-      lives: 3,
+      lives: config.initialLives,
       gamePhase: 'start',
       sequence: [],
       userInput: [],
@@ -284,6 +296,56 @@ export default function CmiModule({ onComplete, onBack }: CmiModuleProps) {
     });
     setGrid(Array(3).fill(0).map(() => Array(3).fill(0)));
   };
+
+  // Start Screen
+  if (!difficulty) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-violet-900 to-indigo-900 flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-purple-800/80 border border-purple-400/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 max-w-3xl w-full"
+        >
+          <h1 className="text-xl sm:text-2xl md:text-4xl font-bold mb-2 sm:mb-3 md:mb-4 text-center text-violet-300">
+            NEUROFORGE
+          </h1>
+          <p className="text-xs sm:text-sm md:text-base text-gray-300 mb-3 sm:mb-4 md:mb-6 text-center">
+            Select Difficulty Level
+          </p>
+
+          <div className="bg-violet-500/10 border border-violet-400/20 p-2 sm:p-3 md:p-5 rounded-lg sm:rounded-lg md:rounded-xl mb-3 sm:mb-4 md:mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2 md:gap-3">
+              {(['easy', 'medium', 'hard'] as const).map((level) => (
+                <motion.button
+                  key={level}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => startGameHandler(level)}
+                  className="p-1.5 sm:p-2 md:p-3 bg-gradient-to-br from-violet-600 to-violet-800 border border-violet-400/50 rounded-lg hover:border-violet-300 transition-all font-semibold text-white text-xs sm:text-sm md:text-base capitalize"
+                >
+                  <div className="text-3xl sm:text-4xl mb-2">
+                    {level === 'easy' && <Brain className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                    {level === 'medium' && <Gamepad2 className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                    {level === 'hard' && <Rocket className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                  </div>
+                  {level}
+                  <div className="text-xs text-violet-300 mt-2">
+                    {level === 'easy' && '5 lives, 5 levels'}
+                    {level === 'medium' && '3 lives, 8 levels'}
+                    {level === 'hard' && '2 lives, 12 levels'}
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-sm sm:text-base text-gray-400 text-center">
+            Test your pattern recognition and memory skills.
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
 
   // Start Screen
   if (gameState.gamePhase === 'start') {
@@ -332,7 +394,7 @@ export default function CmiModule({ onComplete, onBack }: CmiModuleProps) {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={startGameHandler}
+              onClick={() => startGameHandler('medium')}
               className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white rounded-lg font-bold transition"
             >
               ▶️ Start Game

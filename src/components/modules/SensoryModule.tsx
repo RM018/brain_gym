@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Eye, Zap, Target } from 'lucide-react';
 import { ScoringEngine } from '@/lib/scoringEngine';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
 import { useUser } from '@/lib/userContext';
@@ -34,6 +35,7 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
   const { currentUser } = useUser();
   const [gameStartTime, setGameStartTime] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard' | null>(null);
   const [phase, setPhase] = useState<'baseline' | 'loaded'>('baseline');
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
@@ -52,19 +54,21 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
     loaded: { correct: 0, total: 0, reactionTimes: [], misses: 0 },
   });
 
-  const difficulty = 3;
+  const difficultyMap = { easy: 1, medium: 2, hard: 3 };
+  const difficultyLevel = difficulty ? difficultyMap[difficulty] : 2;
+
   const gameConfig = {
     baseline: {
-      spawnInterval: 1500 - (difficulty * 100),
+      spawnInterval: 1500 - (difficultyLevel * 100),
       targetDuration: 2000,
-      targetSize: 100 - (difficulty * 10),
-      distractorRatio: 0.2 + (difficulty * 0.1),
+      targetSize: 100 - (difficultyLevel * 10),
+      distractorRatio: 0.2 + (difficultyLevel * 0.1),
     },
     loaded: {
-      spawnInterval: 1200 - (difficulty * 100),
+      spawnInterval: 1200 - (difficultyLevel * 100),
       targetDuration: 1800,
-      targetSize: 90 - (difficulty * 10),
-      distractorRatio: 0.3 + (difficulty * 0.15),
+      targetSize: 90 - (difficultyLevel * 10),
+      distractorRatio: 0.3 + (difficultyLevel * 0.15),
     }
   };
 
@@ -79,13 +83,9 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
     if (spawnTimerRef.current) clearInterval(spawnTimerRef.current);
   };
 
-  const startGame = () => {
-    setGameStartTime(performance.now());
-    setGameStarted(true);
-    startPhase('baseline');
-  };
-
-  const startPhase = (phaseName: 'baseline' | 'loaded') => {
+  const startPhase = (phaseName: 'baseline' | 'loaded', diffLevel?: 'easy' | 'medium' | 'hard') => {
+    const actualDiffLevel = diffLevel || difficulty;
+    
     setPhase(phaseName);
     setTargets([]);
     setScore(0);
@@ -93,8 +93,9 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
     setCurrentTargetValue(null);
     setGameActive(true);
 
-    if (phaseName === 'loaded') {
-      const loadLevel = 20 + difficulty * 15;
+    if (phaseName === 'loaded' && actualDiffLevel) {
+      const difficultyMultiplier = { easy: 1, medium: 2, hard: 3 }[actualDiffLevel];
+      const loadLevel = 20 + difficultyMultiplier * 15;
       setStressLevel(loadLevel);
     } else {
       setStressLevel(0);
@@ -286,6 +287,61 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
     return (stats.correct / stats.total) * 100;
   };
 
+  // Difficulty Selection Screen
+  if (!difficulty) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-900/95 to-orange-900/40 flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-[#0a2024]/80 border border-orange-500/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 max-w-3xl w-full"
+        >
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-center">
+            <span className="text-orange-400">STRESS RESILIENCE</span>
+          </h1>
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 text-center">
+            Select Difficulty Level
+          </p>
+
+          <div className="bg-[#041517]/60 border border-orange-400/20 p-6 sm:p-8 rounded-xl sm:rounded-2xl mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {(['easy', 'medium', 'hard'] as const).map((level) => (
+                <motion.button
+                  key={level}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    setDifficulty(level);
+                    setGameStartTime(performance.now());
+                    setGameStarted(true);
+                    startPhase('baseline', level);
+                  }}
+                  className="p-4 sm:p-6 bg-gradient-to-br from-orange-600 to-orange-800 border border-orange-400/50 rounded-lg hover:border-orange-300 transition-all font-semibold text-white text-lg capitalize"
+                >
+                  <div className="text-3xl sm:text-4xl mb-2">
+                    {level === 'easy' && <Eye className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                    {level === 'medium' && <Zap className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                    {level === 'hard' && <Target className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                  </div>
+                  {level}
+                  <div className="text-xs text-orange-300 mt-2">
+                    {level === 'easy' && 'Baseline focus'}
+                    {level === 'medium' && 'Moderate load'}
+                    {level === 'hard' && 'High stress'}
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-sm sm:text-base text-gray-400 text-center">
+            Baseline phase (30s) → Stress phase (30s)
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
+
   if (!gameStarted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-slate-900/95 to-orange-900/40 p-3 sm:p-4 md:p-6">
@@ -336,7 +392,7 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={startGame}
+              onClick={() => setGameStarted(true)}
               className="flex-1 px-8 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-full text-base sm:text-lg md:text-xl font-bold shadow-lg"
             >
               START MODULE
@@ -466,29 +522,29 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-slate-900/95 to-orange-900/40 p-3 sm:p-4 md:p-6">
       <div className="w-full max-w-6xl">
         {/* Game Header */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <div className="bg-[#0a2024]/80 border border-orange-500/40 px-4 sm:px-6 py-2 sm:py-3 rounded-xl backdrop-blur-lg">
-            <span className="text-orange-400 font-bold text-xs sm:text-sm">PHASE: </span>
-            <span className="text-lg sm:text-xl md:text-2xl font-mono uppercase">{phase}</span>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 md:gap-3 mb-2 sm:mb-3 md:mb-4">
+          <div className="bg-[#0a2024]/80 border border-orange-500/40 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-lg backdrop-blur-lg">
+            <span className="text-orange-400 font-bold text-xs">PHASE: </span>
+            <span className="text-sm sm:text-base md:text-lg font-mono uppercase">{phase}</span>
           </div>
           
-          <div className="bg-[#0a2024]/80 border border-cyan-500/40 px-4 sm:px-6 py-2 sm:py-3 rounded-xl backdrop-blur-lg">
-            <span className="text-cyan-400 font-bold text-xs sm:text-sm">TIME: </span>
-            <span className="text-lg sm:text-xl md:text-2xl font-mono">{timeLeft}s</span>
+          <div className="bg-[#0a2024]/80 border border-cyan-500/40 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-lg backdrop-blur-lg">
+            <span className="text-cyan-400 font-bold text-xs">TIME: </span>
+            <span className="text-sm sm:text-base md:text-lg font-mono">{timeLeft}s</span>
           </div>
           
-          <div className="bg-[#0a2024]/80 border border-purple-500/40 px-4 sm:px-6 py-2 sm:py-3 rounded-xl backdrop-blur-lg">
-            <span className="text-purple-400 font-bold text-xs sm:text-sm">SCORE: </span>
-            <span className="text-lg sm:text-xl md:text-2xl font-mono">{score}</span>
+          <div className="bg-[#0a2024]/80 border border-purple-500/40 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-lg backdrop-blur-lg">
+            <span className="text-purple-400 font-bold text-xs">SCORE: </span>
+            <span className="text-sm sm:text-base md:text-lg font-mono">{score}</span>
           </div>
           
           {phase === 'loaded' && (
-            <div className="bg-[#0a2024]/80 border border-red-500/40 px-4 sm:px-6 py-2 sm:py-3 rounded-xl backdrop-blur-lg">
-              <span className="text-red-400 font-bold text-xs sm:text-sm">STRESS: </span>
+            <div className="bg-[#0a2024]/80 border border-red-500/40 px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-lg backdrop-blur-lg">
+              <span className="text-red-400 font-bold text-xs">STRESS: </span>
               <motion.span
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ repeat: Infinity, duration: 1 }}
-                className="text-lg sm:text-xl md:text-2xl font-mono"
+                className="text-sm sm:text-base md:text-lg font-mono"
               >
                 {stressLevel}%
               </motion.span>
@@ -497,8 +553,8 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
         </div>
 
         {/* Current Target Display */}
-        <div className="bg-[#0a2024]/80 border border-orange-500/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 mb-4 sm:mb-6 text-center">
-          <div className="text-xs sm:text-sm text-gray-400 mb-2">CURRENT TARGET</div>
+        <div className="bg-[#0a2024]/80 border border-orange-500/40 backdrop-blur-xl rounded-lg sm:rounded-xl md:rounded-2xl p-2 sm:p-3 md:p-4 mb-2 sm:mb-3 md:mb-4 text-center">
+          <div className="text-xs text-gray-400 mb-1.5">CURRENT TARGET</div>
           {currentTargetValue ? (
             <motion.div
               key={currentTargetValue}
@@ -506,14 +562,14 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
               animate={{ scale: 1, opacity: 1 }}
               className="inline-block"
             >
-              <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-emerald-400 font-mono">
+              <div className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-emerald-400 font-mono">
                 {currentTargetValue}
               </div>
             </motion.div>
           ) : (
-            <div className="text-lg sm:text-xl md:text-2xl text-gray-500 py-4">Waiting...</div>
+            <div className="text-base sm:text-lg text-gray-500 py-2 sm:py-3">Waiting...</div>
           )}
-          <div className="text-xs sm:text-sm text-gray-400 mt-2">
+          <div className="text-xs text-gray-400 mt-1">
             Click matching green numbers, avoid red
           </div>
         </div>
@@ -521,10 +577,10 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
         {/* Game Area */}
         <div
           ref={gameAreaRef}
-          className={`relative bg-[#041517]/60 border-2 rounded-2xl sm:rounded-3xl overflow-hidden mb-4 sm:mb-6 transition-all duration-500 ${
+          className={`relative bg-[#041517]/60 border-2 rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden mb-2 sm:mb-3 md:mb-4 transition-all duration-500 ${
             phase === 'loaded' 
-              ? 'border-red-500/60 h-[300px] sm:h-[400px] md:h-[500px]' 
-              : 'border-emerald-500/40 h-[300px] sm:h-[400px] md:h-[500px]'
+              ? 'border-red-500/60 h-[250px] sm:h-[350px] md:h-[450px]' 
+              : 'border-emerald-500/40 h-[250px] sm:h-[350px] md:h-[450px]'
           }`}
           style={{
             background: phase === 'loaded' 
@@ -604,31 +660,31 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
         </div>
 
         {/* Stats Display */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <div className="bg-[#041517]/60 border border-orange-400/30 p-3 sm:p-4 rounded-xl text-center">
-            <div className="text-xs sm:text-sm text-gray-400">Accuracy</div>
-            <div className="text-lg sm:text-xl md:text-2xl font-bold text-emerald-400">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 md:gap-3 mb-2 sm:mb-3 md:mb-4">
+          <div className="bg-[#041517]/60 border border-orange-400/30 p-1.5 sm:p-2 md:p-3 rounded-lg text-center">
+            <div className="text-xs text-gray-400">Accuracy</div>
+            <div className="text-base sm:text-lg md:text-xl font-bold text-emerald-400">
               {getAccuracy().toFixed(0)}%
             </div>
           </div>
           
-          <div className="bg-[#041517]/60 border border-orange-400/30 p-3 sm:p-4 rounded-xl text-center">
-            <div className="text-xs sm:text-sm text-gray-400">Reaction Time</div>
-            <div className="text-lg sm:text-xl md:text-2xl font-bold text-cyan-400">
+          <div className="bg-[#041517]/60 border border-orange-400/30 p-1.5 sm:p-2 md:p-3 rounded-lg text-center">
+            <div className="text-xs text-gray-400">Reaction Time</div>
+            <div className="text-base sm:text-lg md:text-xl font-bold text-cyan-400">
               {getAverageReactionTime().toFixed(0)}ms
             </div>
           </div>
           
-          <div className="bg-[#041517]/60 border border-orange-400/30 p-3 sm:p-4 rounded-xl text-center">
-            <div className="text-xs sm:text-sm text-gray-400">Targets Hit</div>
-            <div className="text-lg sm:text-xl md:text-2xl font-bold text-purple-400">
+          <div className="bg-[#041517]/60 border border-orange-400/30 p-1.5 sm:p-2 md:p-3 rounded-lg text-center">
+            <div className="text-xs text-gray-400">Targets Hit</div>
+            <div className="text-base sm:text-lg md:text-xl font-bold text-purple-400">
               {statsRef.current[phase].correct}
             </div>
           </div>
           
-          <div className="bg-[#041517]/60 border border-orange-400/30 p-3 sm:p-4 rounded-xl text-center">
-            <div className="text-xs sm:text-sm text-gray-400">Missed</div>
-            <div className="text-lg sm:text-xl md:text-2xl font-bold text-red-400">
+          <div className="bg-[#041517]/60 border border-orange-400/30 p-1.5 sm:p-2 md:p-3 rounded-lg text-center">
+            <div className="text-xs text-gray-400">Missed</div>
+            <div className="text-base sm:text-lg md:text-xl font-bold text-red-400">
               {statsRef.current[phase].misses}
             </div>
           </div>
@@ -636,11 +692,11 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
 
         {/* Phase Progress */}
         <div>
-          <div className="flex justify-between text-xs sm:text-sm text-gray-400 mb-2">
+          <div className="flex justify-between text-xs text-gray-400 mb-1.5">
             <span>BASELINE {phase === 'baseline' ? '← ACTIVE' : '✓ COMPLETE'}</span>
             <span>LOADED {phase === 'loaded' ? '← ACTIVE' : 'PENDING'}</span>
           </div>
-          <div className="bg-[#041517]/60 border border-orange-400/20 rounded-full h-2 sm:h-3 overflow-hidden">
+          <div className="bg-[#041517]/60 border border-orange-400/20 rounded-full h-1.5 sm:h-2 md:h-3 overflow-hidden">
             <motion.div
               initial={{ width: '50%' }}
               animate={{ width: phase === 'loaded' ? '100%' : '50%' }}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { MessageCircle, Mic, Volume2 } from 'lucide-react';
 import { ScoringEngine } from '@/lib/scoringEngine';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
 import { useUser } from '@/lib/userContext';
@@ -196,13 +197,20 @@ const scenarios: Scenario[] = [
 export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModuleProps) {
   const { currentUser } = useUser();
   const [gameStartTime, setGameStartTime] = useState(0);
-  const [gamePhase, setGamePhase] = useState<'values' | 'scenarios' | 'results'>('values');
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard' | null>(null);
+  const [gamePhase, setGamePhase] = useState<'difficulty' | 'values' | 'scenarios' | 'results'>('difficulty');
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0);
   const [scenarioScores, setScenarioScores] = useState<{ [key: number]: number }>({});
   const [valueScores, setValueScores] = useState<{ [key: string]: number }>({});
   const [timeRemaining, setTimeRemaining] = useState(10);
   const [timerActive, setTimerActive] = useState(false);
+
+  const difficultyConfig = {
+    easy: { numScenarios: 3, timePerScenario: 15 },
+    medium: { numScenarios: 5, timePerScenario: 12 },
+    hard: { numScenarios: 5, timePerScenario: 8 },
+  };
 
   useEffect(() => {
     if (!timerActive || timeRemaining <= 0) return;
@@ -211,6 +219,12 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
     }, 1000);
     return () => clearInterval(timer);
   }, [timerActive, timeRemaining]);
+
+  const startGame = (selectedDifficulty: 'easy' | 'medium' | 'hard') => {
+    setDifficulty(selectedDifficulty);
+    setGameStartTime(performance.now());
+    setGamePhase('values');
+  };
 
   const currentScenario = scenarios[currentScenarioIndex];
   const hasTimePressure = currentScenario?.timePressure;
@@ -228,6 +242,8 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
   const startScenarios = () => {
     if (selectedValues.length === 0) return;
     setGameStartTime(performance.now());
+    const config = difficultyConfig[difficulty!];
+    setTimeRemaining(config.timePerScenario);
     setGamePhase('scenarios');
     setTimerActive(true);
   };
@@ -255,9 +271,10 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
       return updated;
     });
 
-    if (currentScenarioIndex < scenarios.length - 1) {
+    if (currentScenarioIndex < difficultyConfig[difficulty!].numScenarios - 1) {
       setCurrentScenarioIndex(prev => prev + 1);
-      setTimeRemaining(10);
+      const config = difficultyConfig[difficulty!];
+      setTimeRemaining(config.timePerScenario);
     } else {
       completeGame();
     }
@@ -318,6 +335,55 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
     return Math.max(0, Math.min(100, Math.round(totalAlignment / 5)));
   };
 
+  if (gamePhase === 'difficulty') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-slate-900/95 to-blue-900/40 p-3 sm:p-4 md:p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[#0a2024]/80 border border-blue-500/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 max-w-3xl w-full"
+        >
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-center text-blue-400">
+            VALUES & VOICE
+          </h1>
+          <p className="text-xs sm:text-sm md:text-base text-gray-300 mb-3 sm:mb-4 md:mb-6 text-center">
+            Select Difficulty Level
+          </p>
+
+          <div className="bg-blue-500/10 border border-blue-400/20 p-6 sm:p-8 rounded-xl sm:rounded-2xl mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {(['easy', 'medium', 'hard'] as const).map((level) => (
+                <motion.button
+                  key={level}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => startGame(level)}
+                  className="p-4 sm:p-6 bg-gradient-to-br from-blue-600 to-blue-800 border border-blue-400/50 rounded-lg hover:border-blue-300 transition-all font-semibold text-white text-lg capitalize"
+                >
+                  <div className="text-3xl sm:text-4xl mb-2">
+                    {level === 'easy' && <MessageCircle className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                    {level === 'medium' && <Mic className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                    {level === 'hard' && <Volume2 className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                  </div>
+                  {level}
+                  <div className="text-xs text-blue-300 mt-2">
+                    {level === 'easy' && '3 scenarios, 15s each'}
+                    {level === 'medium' && '5 scenarios, 12s each'}
+                    {level === 'hard' && '5 scenarios, 8s each'}
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-sm sm:text-base text-gray-400 text-center">
+            Explore your values and find your authentic voice in challenging situations.
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
+
   if (gamePhase === 'values') {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-slate-900/95 to-indigo-900/40 p-4 overflow-y-auto">
@@ -326,7 +392,7 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
           animate={{ opacity: 1, y: 0 }}
           className="bg-[#0a1a2e]/80 border border-violet-500/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-3 sm:p-6 md:p-8 lg:p-12 max-w-4xl w-full my-auto"
         >
-          <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-2 sm:mb-3 text-center">
+          <h1 className="text-xl sm:text-2xl md:text-4xl font-bold mb-2 sm:mb-3 md:mb-4 text-center">
             <span className="text-violet-400">VOICE</span>
             <span className="text-pink-400"> & </span>
             <span className="text-cyan-400">VALUE</span>

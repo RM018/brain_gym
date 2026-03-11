@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Sprout, Flame, Zap } from 'lucide-react';
 import { DATEngine } from '@/lib/semanticDistance';
 import { ScoringEngine } from '@/lib/scoringEngine';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
@@ -16,13 +17,23 @@ export default function CreativityModule({ onComplete, onBack }: CreativityModul
   const { currentUser } = useUser();
   const [gameStartTime, setGameStartTime] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [words, setWords] = useState<string[]>(Array(10).fill(''));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [errors, setErrors] = useState<string[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [results, setResults] = useState<any>(null);
 
-  const startGame = () => {
+  const difficultyConfig = {
+    easy: { numWords: 8, timeLimit: 600 },
+    medium: { numWords: 10, timeLimit: 480 },
+    hard: { numWords: 12, timeLimit: 360 },
+  };
+
+  const startGame = (selectedDifficulty: 'easy' | 'medium' | 'hard') => {
+    setDifficulty(selectedDifficulty);
+    const config = difficultyConfig[selectedDifficulty];
+    setWords(Array(config.numWords).fill(''));
     setGameStartTime(performance.now());
     setGameStarted(true);
   };
@@ -34,7 +45,8 @@ export default function CreativityModule({ onComplete, onBack }: CreativityModul
   };
 
   const handleKeyPress = (e: React.KeyboardEvent, index: number) => {
-    if (e.key === 'Enter' && words[index].trim() && index < 9) {
+    const config = difficultyConfig[difficulty];
+    if (e.key === 'Enter' && words[index].trim() && index < config.numWords - 1) {
       setCurrentIndex(index + 1);
     }
   };
@@ -100,53 +112,54 @@ export default function CreativityModule({ onComplete, onBack }: CreativityModul
           animate={{ opacity: 1, y: 0 }}
           className="bg-[#0a2024]/80 border border-emerald-500/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 max-w-3xl w-full"
         >
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-center">
-            <span className="text-purple-400">CREATIVITY</span>{' '}
-            <span className="text-pink-400">ENGINE</span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-center text-purple-400">
+            CREATIVITY ENGINE
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-3 sm:mb-4 text-center">
-            Divergent Association Task (DAT)
-          </p>
-          <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8 text-center px-2">
-            Think of 10 words that are as different from each other as possible. Your semantic distance will measure creative thinking.
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 text-center">
+            Select Difficulty Level
           </p>
 
-          <div className="bg-[#041517]/60 border border-emerald-500/20 p-4 sm:p-6 rounded-xl sm:rounded-2xl mb-6 sm:mb-8">
-            <div className="text-blue-400 font-bold mb-3 sm:mb-4 text-sm sm:text-base">Instructions:</div>
-            <ul className="space-y-1.5 sm:space-y-2 text-gray-300 text-xs sm:text-sm md:text-base">
-              <li>• Enter 10 single words (no phrases)</li>
-              <li>• Make each word as different as possible from the others</li>
-              <li>• Think across categories, concepts, and domains</li>
-              <li>• Be creative - there are no wrong answers!</li>
-            </ul>
-          </div>
-
-          <div className="bg-purple-500/10 border border-purple-400/20 p-4 sm:p-6 rounded-xl sm:rounded-2xl mb-6 sm:mb-8">
-            <div className="font-bold mb-2 text-purple-300 text-sm sm:text-base">Examples of high creativity:</div>
-            <div className="text-xs sm:text-sm text-gray-300 break-words">
-              "Galaxy, Pencil, Democracy, Octopus, Jazz, Molecule, Glacier, Laughter, Circuit, Silk"
+          <div className="bg-purple-500/10 border border-purple-400/20 p-6 sm:p-8 rounded-xl sm:rounded-2xl mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {(['easy', 'medium', 'hard'] as const).map((level) => (
+                <motion.button
+                  key={level}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => startGame(level)}
+                  className="p-4 sm:p-6 bg-gradient-to-br from-purple-600 to-purple-800 border border-purple-400/50 rounded-lg hover:border-purple-300 transition-all font-semibold text-white text-lg capitalize"
+                >
+                  <div className="text-3xl sm:text-4xl mb-2">
+                    {level === 'easy' && <Sprout className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                    {level === 'medium' && <Flame className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                    {level === 'hard' && <Zap className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                  </div>
+                  {level}
+                  <div className="text-xs text-purple-300 mt-2">
+                    {level === 'easy' && '8 words, 10 min'}
+                    {level === 'medium' && '10 words, 8 min'}
+                    {level === 'hard' && '12 words, 6 min'}
+                  </div>
+                </motion.button>
+              ))}
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8 text-center px-2">
+            Think of words that are as different from each other as possible. Your semantic distance will measure creative thinking.
+          </p>
+
+          <div className="flex justify-center">
             {onBack && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onBack}
-                className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-full text-base sm:text-lg md:text-xl font-bold"
+                className="px-6 sm:px-8 py-2 sm:py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-full text-base font-semibold"
               >
                 Back
               </motion.button>
             )}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={startGame}
-              className="flex-1 px-8 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full text-base sm:text-lg md:text-xl font-bold"
-            >
-              BEGIN CREATIVITY TEST
-            </motion.button>
           </div>
         </motion.div>
       </div>

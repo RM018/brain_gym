@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Target, Swords, Flame } from 'lucide-react';
 import { ScoringEngine } from '@/lib/scoringEngine';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
 import { useUser } from '@/lib/userContext';
@@ -130,10 +131,11 @@ const scenarios: ConflictScenario[] = [
   },
 ];
 
-export default function ConflictModule({ onComplete, onBack }: ConflictModuleProps) {
+export default function ConflictModule({ onComplete, onBack: _onBack }: ConflictModuleProps) {
   const { currentUser } = useUser();
   const [gameStartTime, setGameStartTime] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [currentScenario, setCurrentScenario] = useState(0);
   const [metrics, setMetrics] = useState<ConflictMetrics>({
     empathy: 0,
@@ -147,7 +149,14 @@ export default function ConflictModule({ onComplete, onBack }: ConflictModulePro
   const [showFinalResults, setShowFinalResults] = useState(false);
   const [finalResults, setFinalResults] = useState<any>(null);
 
-  const startGame = () => {
+  const difficultyConfig = {
+    easy: { numScenarios: 2, emotionalBoost: 0 },
+    medium: { numScenarios: 3, emotionalBoost: 0 },
+    hard: { numScenarios: 3, emotionalBoost: 20 },
+  };
+
+  const startGame = (selectedDifficulty: 'easy' | 'medium' | 'hard') => {
+    setDifficulty(selectedDifficulty);
     const now = performance.now();
     setGameStartTime(now);
     setGameStarted(true);
@@ -175,15 +184,16 @@ export default function ConflictModule({ onComplete, onBack }: ConflictModulePro
 
     setTimeout(() => {
       setShowFeedback(false);
-      if (currentScenario < scenarios.length - 1) {
+      const config = difficultyConfig[difficulty];
+      if (currentScenario < config.numScenarios - 1) {
         setCurrentScenario(prev => prev + 1);
         setResponseStartTime(performance.now());
       } else {
         // Game complete
-        const avgEmpathy = (metrics.empathy + response.empathyScore) / scenarios.length;
-        const avgAssertiveness = (metrics.assertiveness + response.assertivenessScore) / scenarios.length;
-        const avgResolution = (metrics.resolution + response.resolutionScore) / scenarios.length;
-        const avgRegulation = (metrics.regulation + regulationScore) / scenarios.length;
+        const avgEmpathy = (metrics.empathy + response.empathyScore) / config.numScenarios;
+        const avgAssertiveness = (metrics.assertiveness + response.assertivenessScore) / config.numScenarios;
+        const avgResolution = (metrics.resolution + response.resolutionScore) / config.numScenarios;
+        const avgRegulation = (metrics.regulation + regulationScore) / config.numScenarios;
 
         const scoring = new ScoringEngine();
         const moduleScore = scoring.calculateConflictScore(
@@ -233,59 +243,42 @@ export default function ConflictModule({ onComplete, onBack }: ConflictModulePro
           animate={{ opacity: 1, y: 0 }}
           className="bg-[#0a2024]/80 border border-pink-500/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 max-w-3xl w-full"
         >
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-center bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
-            CONFLICT & EQ ENGINE
+          <h1 className="text-xl sm:text-2xl md:text-4xl font-bold mb-2 sm:mb-3 md:mb-4 text-center text-pink-400">
+            CONFLICT RESOLUTION
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-3 sm:mb-4 text-center">
-            Emotional Intelligence Under Pressure
-          </p>
-          <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8 text-center px-2">
-            Navigate difficult interpersonal situations. Your empathy, assertiveness, and conflict resolution skills will be tested.
+          <p className="text-xs sm:text-sm md:text-base text-gray-300 mb-3 sm:mb-4 md:mb-6 text-center">
+            Select Difficulty Level
           </p>
 
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
-            <div className="bg-[#041517]/60 border border-pink-400/30 p-3 sm:p-4 md:p-6 rounded-xl text-center">
-              <div className="text-2xl sm:text-3xl md:text-4xl mb-2">🤝</div>
-              <div className="text-pink-400 font-bold text-sm sm:text-base">Empathy</div>
-              <div className="text-xs sm:text-sm text-gray-400">Understanding perspectives</div>
-            </div>
-            <div className="bg-[#041517]/60 border border-pink-400/30 p-3 sm:p-4 md:p-6 rounded-xl text-center">
-              <div className="text-2xl sm:text-3xl md:text-4xl mb-2">💪</div>
-              <div className="text-purple-400 font-bold text-sm sm:text-base">Assertiveness</div>
-              <div className="text-xs sm:text-sm text-gray-400">Standing firm</div>
-            </div>
-            <div className="bg-[#041517]/60 border border-pink-400/30 p-3 sm:p-4 md:p-6 rounded-xl text-center">
-              <div className="text-2xl sm:text-3xl md:text-4xl mb-2">⚖️</div>
-              <div className="text-emerald-400 font-bold text-sm sm:text-base">Resolution</div>
-              <div className="text-xs sm:text-sm text-gray-400">Finding solutions</div>
-            </div>
-            <div className="bg-[#041517]/60 border border-pink-400/30 p-3 sm:p-4 md:p-6 rounded-xl text-center">
-              <div className="text-2xl sm:text-3xl md:text-4xl mb-2">🧘</div>
-              <div className="text-rose-400 font-bold text-sm sm:text-base">Regulation</div>
-              <div className="text-xs sm:text-sm text-gray-400">Managing response</div>
+          <div className="bg-pink-500/10 border border-pink-400/20 p-2 sm:p-3 md:p-5 rounded-lg sm:rounded-lg md:rounded-xl mb-3 sm:mb-4 md:mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2 md:gap-3">
+              {(['easy', 'medium', 'hard'] as const).map((level) => (
+                <motion.button
+                  key={level}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => startGame(level)}
+                  className="p-1.5 sm:p-2 md:p-3 bg-gradient-to-br from-pink-600 to-pink-800 border border-pink-400/50 rounded-lg hover:border-pink-300 transition-all font-semibold text-white text-xs sm:text-sm md:text-base capitalize"
+                >
+                  <div className="text-3xl sm:text-4xl mb-2">
+                    {level === 'easy' && <Target className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                    {level === 'medium' && <Swords className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                    {level === 'hard' && <Flame className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                  </div>
+                  {level}
+                  <div className="text-xs text-pink-300 mt-2">
+                    {level === 'easy' && '2 scenarios'}
+                    {level === 'medium' && '3 scenarios'}
+                    {level === 'hard' && '3 intense scenarios'}
+                  </div>
+                </motion.button>
+              ))}
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            {onBack && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onBack}
-                className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-full text-base sm:text-lg font-bold"
-              >
-                Back
-              </motion.button>
-            )}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={startGame}
-              className="flex-1 px-8 sm:px-12 py-3 sm:py-4 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-full text-base sm:text-lg md:text-xl font-bold shadow-lg"
-            >
-              BEGIN SCENARIOS
-            </motion.button>
-          </div>
+          <p className="text-sm sm:text-base text-gray-400 text-center">
+            Navigate conflict situations and develop your emotional intelligence.
+          </p>
         </motion.div>
       </div>
     );

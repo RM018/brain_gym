@@ -127,11 +127,11 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
           animate={{ opacity: 1, y: 0 }}
           className="bg-[#0a2024]/80 border border-emerald-500/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 max-w-3xl w-full"
         >
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-center">
+          <h1 className="text-xl sm:text-2xl md:text-4xl font-bold mb-2 sm:mb-3 md:mb-4 text-center">
             <span className="text-purple-400">MEMORY</span>{' '}
             <span className="text-pink-400">MASTERY</span>
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-3 sm:mb-4 text-center">
+          <p className="text-xs sm:text-sm md:text-base text-gray-300 mb-3 sm:mb-4 md:mb-6 text-center">
             Match pairs of symbols and test your working memory
           </p>
 

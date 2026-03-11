@@ -229,7 +229,6 @@ const TrainingFloor = () => {
           setTrainingActive(false);
           setSelectedAbility(null);
         }}
-        difficulty={5}
       />
     );
   }

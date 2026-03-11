@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Crown, Zap, Diamond } from 'lucide-react';
 import { ScoringEngine } from '@/lib/scoringEngine';
 import { BrainMetricsAggregator } from '@/lib/brainMetrics';
 import { useUser } from '@/lib/userContext';
@@ -9,7 +10,6 @@ import { useUser } from '@/lib/userContext';
 export interface LeadershipModuleProps {
   onComplete: (score: number, decisions: DecisionData[]) => void;
   onBack: () => void;
-  difficulty?: number;
 }
 
 interface DecisionData {
@@ -23,6 +23,7 @@ interface Scenario {
   title: string;
   description: string;
   timePressure: boolean;
+  difficulty: 'easy' | 'medium' | 'hard';
   options: {
     text: string;
     impact: {
@@ -41,6 +42,7 @@ const scenarios: Scenario[] = [
     id: 1,
     title: 'Critical Deadline Approaching',
     description: 'You\'re managing a critical project that\'s behind schedule. Two approaches conflict, and stakeholders demand daily updates. How do you lead?',
+    difficulty: 'medium',
     timePressure: true,
     options: [
       {
@@ -69,6 +71,7 @@ const scenarios: Scenario[] = [
     id: 2,
     title: 'Resource Allocation Dilemma',
     description: 'Budget cuts force tough choices. High-visibility project vs strategic long-term initiative. Your decision defines your leadership priorities.',
+    difficulty: 'medium',
     timePressure: false,
     options: [
       {
@@ -97,6 +100,7 @@ const scenarios: Scenario[] = [
     id: 3,
     title: 'Performance Management Challenge',
     description: 'A key contributor is underperforming. Rumors suggest personal issues. You must address it while showing empathy.',
+    difficulty: 'medium',
     timePressure: false,
     options: [
       {
@@ -125,6 +129,7 @@ const scenarios: Scenario[] = [
     id: 4,
     title: 'Impossible Client Demand',
     description: 'Major client demands something that conflicts with your professional judgment. Pushing back risks the relationship.',
+    difficulty: 'hard',
     timePressure: true,
     options: [
       {
@@ -153,6 +158,7 @@ const scenarios: Scenario[] = [
     id: 5,
     title: 'Cross-Department Conflict',
     description: 'Another department\'s actions caused problems you\'re blamed for. Tensions are high. Your response matters.',
+    difficulty: 'hard',
     timePressure: false,
     options: [
       {
@@ -181,6 +187,7 @@ const scenarios: Scenario[] = [
     id: 6,
     title: 'Technical Debt Crisis',
     description: 'Massive technical debt slows everything. Team divided on approach: complete rewrite vs incremental fixes.',
+    difficulty: 'hard',
     timePressure: true,
     options: [
       {
@@ -209,6 +216,7 @@ const scenarios: Scenario[] = [
     id: 7,
     title: 'Key Departure',
     description: 'Your most skilled team member resigned. They hold critical knowledge. You have two weeks for transition.',
+    difficulty: 'medium',
     timePressure: true,
     options: [
       {
@@ -237,6 +245,7 @@ const scenarios: Scenario[] = [
     id: 8,
     title: 'Ethical Dilemma',
     description: 'Senior leadership asks you to misrepresent project status. Refusing could damage your career. Your ethics are tested.',
+    difficulty: 'hard',
     timePressure: false,
     options: [
       {
@@ -265,6 +274,7 @@ const scenarios: Scenario[] = [
     id: 9,
     title: 'Burnout Recognition',
     description: 'You recognize signs of severe burnout in yourself and others. Critical deliverables are due. Your health and leadership are at stake.',
+    difficulty: 'hard',
     timePressure: true,
     options: [
       {
@@ -293,6 +303,7 @@ const scenarios: Scenario[] = [
     id: 10,
     title: 'Innovation vs Stability',
     description: 'Pressure to adopt risky new technology vs proven stability. Your decision sets long-term direction. Both sides are compelling.',
+    difficulty: 'medium',
     timePressure: false,
     options: [
       {
@@ -319,8 +330,9 @@ const scenarios: Scenario[] = [
   },
 ];
 
-export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }: LeadershipModuleProps) {
+export default function LeadershipModule({ onComplete, onBack }: LeadershipModuleProps) {
   const { currentUser } = useUser();
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard' | null>(null);
   const [gameStarted, setGameStarted] = useState(false);
   const [currentScenario, setCurrentScenario] = useState(0);
   const [leadershipScore, setLeadershipScore] = useState(50);
@@ -339,6 +351,12 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
   const [showFinalResults, setShowFinalResults] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
 
+  const difficultyConfig = {
+    easy: { maxScenarios: 2, filterDifficulty: ['easy', 'medium'] },
+    medium: { maxScenarios: 3, filterDifficulty: ['easy', 'medium', 'hard'] },
+    hard: { maxScenarios: 4, filterDifficulty: ['hard', 'medium'] },
+  };
+
   useEffect(() => {
     if (timeLeft === null || !gameStarted) return;
     
@@ -355,7 +373,10 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
     return () => clearInterval(timer);
   }, [timeLeft, gameStarted]);
 
-  const startGame = () => {
+  const startGame = (selectedDifficulty?: 'easy' | 'medium' | 'hard') => {
+    if (selectedDifficulty) {
+      setDifficulty(selectedDifficulty);
+    }
     const now = performance.now();
     setGameStarted(true);
     setGameStartTime(now);
@@ -374,14 +395,15 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
     const baseQuality = (option.impact.leadership + option.impact.integrity + option.impact.effectiveness + option.impact.confidence) / 4;
     const timeBonus = scenario.timePressure ? Math.max(0, 20 - (decisionTime / 100)) : 0;
     const quality = baseQuality + timeBonus;
-    
+
     // Speed score
     const speedScore = scenario.timePressure 
       ? Math.max(0, 100 - (decisionTime / 50))
       : Math.max(0, 100 - (decisionTime / 100));
 
     // Update scores with difficulty modifier
-    const diffMultiplier = 0.5 + (difficulty * 0.1);
+    const difficultyMultipliers = { easy: 0.8, medium: 1.0, hard: 1.3 };
+    const diffMultiplier = difficultyMultipliers[difficulty!];
     setLeadershipScore(prev => Math.max(0, Math.min(100, prev + option.impact.leadership * diffMultiplier)));
     setIntegrityScore(prev => Math.max(0, Math.min(100, prev + option.impact.integrity * diffMultiplier)));
     setEffectivenessScore(prev => Math.max(0, Math.min(100, prev + option.impact.effectiveness * diffMultiplier)));
@@ -421,7 +443,8 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
 
     setTimeout(() => {
       setShowResult(false);
-      if (currentScenario < scenarios.length - 1) {
+      const config = difficultyConfig[difficulty!];
+      if (currentScenario < config.maxScenarios - 1) {
         setCurrentScenario(prev => prev + 1);
         setDecisionStartTime(performance.now());
         if (scenarios[currentScenario + 1].timePressure) {
@@ -460,6 +483,68 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
       }
     }, 2500);
   };
+
+  if (!difficulty) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-slate-900/95 to-purple-900/40 p-3 sm:p-4 md:p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[#0a2024]/80 border border-purple-500/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 max-w-3xl w-full"
+        >
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-center text-purple-400">
+            LEADERSHIP CRISIS SIMULATOR
+          </h1>
+          <p className="text-xs sm:text-sm md:text-base text-gray-300 mb-3 sm:mb-4 md:mb-6 text-center">
+            Select Difficulty Level
+          </p>
+
+          <div className="bg-purple-500/10 border border-purple-400/20 p-6 sm:p-8 rounded-xl sm:rounded-2xl mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {(['easy', 'medium', 'hard'] as const).map((level) => (
+                <motion.button
+                  key={level}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => startGame(level)}
+                  className="p-4 sm:p-6 bg-gradient-to-br from-purple-600 to-purple-800 border border-purple-400/50 rounded-lg hover:border-purple-300 transition-all font-semibold text-white text-lg capitalize"
+                >
+                  <div className="text-3xl sm:text-4xl mb-2">
+                    {level === 'easy' && <Crown className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                    {level === 'medium' && <Zap className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                    {level === 'hard' && <Diamond className="w-8 h-8 sm:w-10 sm:h-10 mx-auto" />}
+                  </div>
+                  {level}
+                  <div className="text-xs text-purple-300 mt-2">
+                    {level === 'easy' && '2 scenarios, longer time'}
+                    {level === 'medium' && '3 scenarios, medium time'}
+                    {level === 'hard' && '4 scenarios, less time'}
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+
+          <p className="text-sm sm:text-base text-gray-400 text-center">
+            Navigate complex leadership decisions and build your leadership reputation.
+          </p>
+
+          {onBack && (
+            <div className="flex justify-center mt-6">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onBack}
+                className="px-6 sm:px-8 py-2 sm:py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-full text-base font-semibold"
+              >
+                Back
+              </motion.button>
+            </div>
+          )}
+        </motion.div>
+      </div>
+    );
+  }
 
   if (!gameStarted) {
     return (
@@ -549,12 +634,12 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
 
           <div className="bg-slate-800/60 border border-slate-700 p-4 sm:p-6 rounded-2xl mb-6 sm:mb-8">
             <h4 className="text-lg sm:text-xl font-bold text-green-400 mb-2 sm:mb-3">
-              Challenge Level: {difficulty}/10
+              Challenge Level: {{easy: 3, medium: 6, hard: 9}[difficulty!]}/10
             </h4>
             <div className="w-full bg-slate-900 rounded-full h-3 sm:h-4">
               <motion.div 
                 initial={{ width: 0 }}
-                animate={{ width: `${difficulty * 10}%` }}
+                animate={{ width: `${{easy: 30, medium: 60, hard: 90}[difficulty!]}%` }}
                 className="bg-gradient-to-r from-purple-500 to-blue-500 h-3 sm:h-4 rounded-full"
               />
             </div>
@@ -572,7 +657,7 @@ export default function LeadershipModule({ onComplete, onBack, difficulty = 5 }:
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={startGame}
+              onClick={() => startGame()}
               className="flex-1 px-8 sm:px-12 py-4 sm:py-6 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full text-xl sm:text-2xl font-bold shadow-lg shadow-purple-500/50"
             >
               START CHALLENGE
