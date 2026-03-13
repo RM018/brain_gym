@@ -206,6 +206,22 @@ export default function VoiceValueModule({ onComplete, onBack }: VoiceValueModul
   const [timeRemaining, setTimeRemaining] = useState(10);
   const [timerActive, setTimerActive] = useState(false);
 
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+  
+    const handleBack = () => {
+      if (onBack) {
+        onBack();
+      }
+    };
+  
+    window.addEventListener("popstate", handleBack);
+  
+    return () => {
+      window.removeEventListener("popstate", handleBack);
+    };
+  }, [onBack]);
+
   const difficultyConfig = {
     easy: { numScenarios: 3, timePerScenario: 15 },
     medium: { numScenarios: 5, timePerScenario: 12 },

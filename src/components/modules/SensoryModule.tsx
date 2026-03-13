@@ -54,6 +54,22 @@ export default function SensoryModule({ onComplete, onBack }: SensoryModuleProps
     loaded: { correct: 0, total: 0, reactionTimes: [], misses: 0 },
   });
 
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+  
+    const handleBack = () => {
+      if (onBack) {
+        onBack();
+      }
+    };
+  
+    window.addEventListener("popstate", handleBack);
+  
+    return () => {
+      window.removeEventListener("popstate", handleBack);
+    };
+  }, [onBack]);
+
   const difficultyMap = { easy: 1, medium: 2, hard: 3 };
   const difficultyLevel = difficulty ? difficultyMap[difficulty] : 2;
 

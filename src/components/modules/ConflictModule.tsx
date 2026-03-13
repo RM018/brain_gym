@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Target, Swords, Flame } from 'lucide-react';
 import { ScoringEngine } from '@/lib/scoringEngine';
@@ -148,6 +148,23 @@ export default function ConflictModule({ onComplete, onBack: _onBack }: Conflict
   const [lastResponse, setLastResponse] = useState('');
   const [showFinalResults, setShowFinalResults] = useState(false);
   const [finalResults, setFinalResults] = useState<any>(null);
+
+
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+  
+    const handleBack = () => {
+      if (_onBack) {
+        _onBack();
+      }
+    };
+  
+    window.addEventListener("popstate", handleBack);
+  
+    return () => {
+      window.removeEventListener("popstate", handleBack);
+    };
+  }, [_onBack]);
 
   const difficultyConfig = {
     easy: { numScenarios: 2, emotionalBoost: 0 },

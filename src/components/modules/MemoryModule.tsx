@@ -51,6 +51,23 @@ export default function MemoryModule({ onComplete, onBack }: MemoryModuleProps) 
   const [gameOver, setGameOver] = useState(false);
   const [showResults, setShowResults] = useState(false);
 
+
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+  
+    const handleBack = () => {
+      if (onBack) {
+        onBack();
+      }
+    };
+  
+    window.addEventListener("popstate", handleBack);
+  
+    return () => {
+      window.removeEventListener("popstate", handleBack);
+    };
+  }, [onBack]);
+
   const difficultyConfig = {
     easy: { pairs: 6, time: 120 },
     medium: { pairs: 8, time: 180 },

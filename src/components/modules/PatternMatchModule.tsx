@@ -143,6 +143,22 @@ export default function PatternMatchModule({ onComplete, onBack }: PatternMatchM
   const [totalTime, setTotalTime] = useState(0); // track total time spent
 
   useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+  
+    const handleBack = () => {
+      if (onBack) {
+        onBack();
+      }
+    };
+  
+    window.addEventListener("popstate", handleBack);
+  
+    return () => {
+      window.removeEventListener("popstate", handleBack);
+    };
+  }, [onBack]);
+
+  useEffect(() => {
     if (!gameStarted || showResults) return;
 
     const timer = setInterval(() => {

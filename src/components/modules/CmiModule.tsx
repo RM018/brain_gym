@@ -74,6 +74,22 @@ export default function CmiModule({ onComplete, onBack }: CmiModuleProps) {
 
   const monitorRef = useRef(new PerformanceMonitor());
 
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+  
+    const handleBack = () => {
+      if (onBack) {
+        onBack();
+      }
+    };
+  
+    window.addEventListener("popstate", handleBack);
+  
+    return () => {
+      window.removeEventListener("popstate", handleBack);
+    };
+  }, [onBack]);
+
   const generateSequence = useCallback((level: number): GameSequence[] => {
     const sequence: GameSequence[] = [];
     const operations: ('add' | 'subtract' | 'multiply' | 'rotate')[] = ['add', 'subtract', 'multiply', 'rotate'];

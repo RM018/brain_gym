@@ -351,6 +351,22 @@ export default function LeadershipModule({ onComplete, onBack }: LeadershipModul
   const [showFinalResults, setShowFinalResults] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
 
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+  
+    const handleBack = () => {
+      if (onBack) {
+        onBack();
+      }
+    };
+  
+    window.addEventListener("popstate", handleBack);
+  
+    return () => {
+      window.removeEventListener("popstate", handleBack);
+    };
+  }, [onBack]);
+
   const difficultyConfig = {
     easy: { maxScenarios: 2, filterDifficulty: ['easy', 'medium'] },
     medium: { maxScenarios: 3, filterDifficulty: ['easy', 'medium', 'hard'] },

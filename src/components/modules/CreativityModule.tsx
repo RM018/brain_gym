@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Sprout, Flame, Zap } from 'lucide-react';
 import { DATEngine } from '@/lib/semanticDistance';
@@ -23,6 +23,23 @@ export default function CreativityModule({ onComplete, onBack }: CreativityModul
   const [errors, setErrors] = useState<string[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [results, setResults] = useState<any>(null);
+
+
+  useEffect(() => {
+  window.history.pushState(null, "", window.location.href);
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    }
+  };
+
+  window.addEventListener("popstate", handleBack);
+
+  return () => {
+    window.removeEventListener("popstate", handleBack);
+  };
+}, [onBack]);
 
   const difficultyConfig = {
     easy: { numWords: 8, timeLimit: 600 },
@@ -102,6 +119,9 @@ export default function CreativityModule({ onComplete, onBack }: CreativityModul
     } catch (error: any) {
       setErrors([error.message]);
     }
+
+
+    
   };
 
   if (!gameStarted) {
